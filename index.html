@@ -183,7 +183,33 @@ body {
 .exercise-btn .ex-icon.pass { background: rgba(232, 64, 64, 0.15); }
 .exercise-btn .ex-icon.rad { background: rgba(160, 100, 255, 0.15); }
 .exercise-btn .ex-icon.intc { background: rgba(255, 100, 150, 0.15); }
+.exercise-btn .ex-icon.loc { background: rgba(255, 220, 50, 0.15); }
 .exercise-btn .ex-icon.tri { background: rgba(100, 200, 255, 0.15); }
+
+/* Map hidden for "locate" exercise */
+.map-container.map-hidden {
+  position: relative;
+}
+.map-container.map-hidden canvas {
+  filter: blur(20px) brightness(0.3);
+  pointer-events: none;
+}
+.map-container.map-hidden::after {
+  content: '👁 MAPA OCULTO — Usa solo el instrumento';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: var(--accent-amber);
+  font-family: 'Orbitron', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  text-align: center;
+  text-shadow: 0 0 20px rgba(0,0,0,0.8);
+  pointer-events: none;
+  z-index: 5;
+  letter-spacing: 1px;
+}
 
 .exercise-btn .ex-info {
   display: flex;
@@ -351,12 +377,13 @@ body {
   justify-content: flex-start;
   padding: 20px;
   overflow-y: auto;
+  position: relative;
 }
 
 .instrument-wrapper {
   position: relative;
-  width: 400px;
-  height: 400px;
+  width: 340px;
+  height: 340px;
   margin-bottom: 16px;
   flex-shrink: 0;
 }
@@ -376,7 +403,7 @@ body {
   gap: 16px;
   margin-bottom: 20px;
   width: 100%;
-  max-width: 400px;
+  max-width: 340px;
 }
 
 .obs-knob-area {
@@ -437,7 +464,7 @@ body {
 /* Exercise prompt area */
 .exercise-prompt {
   width: 100%;
-  max-width: 420px;
+  max-width: 380px;
   background: rgba(0,0,0,0.3);
   border: 1px solid var(--panel-border);
   border-radius: 10px;
@@ -599,25 +626,10 @@ body {
 .hidden { display: none !important; }
 
 /* ═══════════ RESPONSIVE ═══════════ */
-@media (max-width: 1400px) {
-  .instrument-wrapper {
-    width: 360px;
-    height: 360px;
-  }
-  .exercise-prompt { max-width: 380px; }
-  .obs-controls { max-width: 360px; }
-}
-
 @media (max-width: 1100px) {
   .main-container {
     grid-template-columns: 240px 1fr 1fr;
   }
-  .instrument-wrapper {
-    width: 320px;
-    height: 320px;
-  }
-  .exercise-prompt { max-width: 340px; }
-  .obs-controls { max-width: 320px; }
 }
 
 @media (max-width: 900px) {
@@ -631,11 +643,11 @@ body {
     max-height: 200px;
   }
   .instrument-wrapper {
-    width: 300px;
-    height: 300px;
+    width: 280px;
+    height: 280px;
   }
-  .exercise-prompt { max-width: 320px; }
-  .obs-controls { max-width: 300px; }
+  .exercise-prompt { max-width: 300px; }
+  .obs-controls { max-width: 280px; }
 }
 
 /* ═══════════ ANIMATIONS ═══════════ */
@@ -659,8 +671,8 @@ body {
 }
 
 .instrument-pair .instrument-wrapper {
-  width: 280px;
-  height: 280px;
+  width: 240px;
+  height: 240px;
 }
 
 .instrument-pair .obs-controls {
@@ -694,6 +706,343 @@ body {
 
 .explanation-box strong {
   color: var(--accent-cyan);
+}
+
+/* ═══════════ CONTEXTUAL HELP SYSTEM ═══════════ */
+
+/* Help button - floating "?" in instrument panel */
+.help-btn {
+  position: absolute;
+  bottom: 16px;
+  right: 16px;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 2px solid var(--accent-cyan);
+  background: rgba(0, 212, 255, 0.1);
+  color: var(--accent-cyan);
+  font-family: 'Orbitron', sans-serif;
+  font-size: 18px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 50;
+  transition: all 0.3s ease;
+  box-shadow: 0 0 12px rgba(0, 212, 255, 0.15), inset 0 0 8px rgba(0, 212, 255, 0.05);
+}
+
+.help-btn:hover {
+  background: rgba(0, 212, 255, 0.2);
+  box-shadow: 0 0 20px rgba(0, 212, 255, 0.3), inset 0 0 12px rgba(0, 212, 255, 0.1);
+  transform: scale(1.08);
+}
+
+.help-btn.active {
+  background: rgba(0, 212, 255, 0.25);
+  box-shadow: 0 0 24px rgba(0, 212, 255, 0.4);
+}
+
+.help-btn.hidden {
+  display: none !important;
+}
+
+/* Inactivity nudge message */
+.help-nudge {
+  position: absolute;
+  bottom: 62px;
+  right: 8px;
+  background: rgba(0, 212, 255, 0.12);
+  border: 1px solid rgba(0, 212, 255, 0.25);
+  border-radius: 8px;
+  padding: 6px 12px;
+  font-size: 12px;
+  color: var(--accent-cyan);
+  white-space: nowrap;
+  pointer-events: none;
+  z-index: 50;
+  opacity: 0;
+  transform: translateY(5px);
+  transition: opacity 0.4s ease, transform 0.4s ease;
+}
+
+.help-nudge.visible {
+  opacity: 1;
+  transform: translateY(0);
+  animation: nudge-pulse 2s ease-in-out infinite;
+}
+
+@keyframes nudge-pulse {
+  0%, 100% { opacity: 0.7; }
+  50% { opacity: 1; }
+}
+
+/* Help overlay backdrop */
+.help-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.45);
+  z-index: 500;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+
+.help-overlay.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* Help panel - slides from right */
+.help-panel {
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: 360px;
+  height: 100%;
+  background: linear-gradient(180deg, #14171f 0%, #0e1018 40%, #0a0c10 100%);
+  border-left: 1px solid var(--panel-border);
+  z-index: 510;
+  transform: translateX(100%);
+  transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.help-panel.active {
+  transform: translateX(0);
+}
+
+.help-panel::-webkit-scrollbar { width: 4px; }
+.help-panel::-webkit-scrollbar-track { background: transparent; }
+.help-panel::-webkit-scrollbar-thumb { background: var(--panel-border); border-radius: 2px; }
+
+/* Help panel header */
+.help-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--panel-border);
+  flex-shrink: 0;
+}
+
+.help-panel-header h3 {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 14px;
+  letter-spacing: 2px;
+  color: var(--accent-cyan);
+}
+
+.help-close-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 1px solid var(--panel-border);
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--text-dim);
+  font-size: 18px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+.help-close-btn:hover {
+  border-color: var(--error);
+  color: var(--error);
+  background: rgba(255, 68, 68, 0.1);
+}
+
+/* Help panel body */
+.help-panel-body {
+  padding: 20px;
+  flex: 1;
+}
+
+/* Exercise explanation section */
+.help-explanation {
+  background: rgba(0, 212, 255, 0.05);
+  border: 1px solid rgba(0, 212, 255, 0.12);
+  border-radius: 10px;
+  padding: 14px 16px;
+  margin-bottom: 20px;
+}
+
+.help-explanation h4 {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 11px;
+  letter-spacing: 2px;
+  color: var(--accent-cyan);
+  margin-bottom: 8px;
+  text-transform: uppercase;
+}
+
+.help-explanation p {
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--text-primary);
+}
+
+/* Hints section */
+.help-hints-title {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 11px;
+  letter-spacing: 2px;
+  color: var(--text-dim);
+  margin-bottom: 12px;
+  text-transform: uppercase;
+}
+
+.help-hint-item {
+  margin-bottom: 10px;
+}
+
+/* Hint button */
+.hint-btn {
+  width: 100%;
+  padding: 10px 14px;
+  border: 1px solid var(--panel-border);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.02);
+  color: var(--text-primary);
+  font-family: 'Exo 2', sans-serif;
+  font-size: 13px;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.25s ease;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.hint-btn:hover:not(:disabled) {
+  border-color: var(--accent-amber);
+  background: rgba(255, 176, 32, 0.06);
+}
+
+.hint-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.hint-btn.revealed {
+  border-color: rgba(255, 176, 32, 0.3);
+  background: rgba(255, 176, 32, 0.08);
+  cursor: default;
+}
+
+.hint-btn .hint-label {
+  font-weight: 600;
+  color: var(--accent-amber);
+}
+
+.hint-btn .hint-penalty {
+  font-size: 11px;
+  color: var(--error);
+  opacity: 0.7;
+}
+
+.hint-btn.revealed .hint-penalty {
+  color: var(--text-dim);
+  text-decoration: line-through;
+  opacity: 0.5;
+}
+
+/* Hint content area */
+.hint-content {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.4s ease, padding 0.3s ease, opacity 0.3s ease;
+  opacity: 0;
+  padding: 0 14px;
+  background: rgba(255, 176, 32, 0.03);
+  border-left: 2px solid rgba(255, 176, 32, 0.2);
+  margin-left: 8px;
+  margin-top: 0;
+  border-radius: 0 6px 6px 0;
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--text-primary);
+}
+
+.hint-content.visible {
+  max-height: 200px;
+  opacity: 1;
+  padding: 10px 14px;
+  margin-top: 6px;
+}
+
+/* Guide question */
+.help-guide-section {
+  margin-top: 24px;
+  padding-top: 16px;
+  border-top: 1px solid var(--panel-border);
+}
+
+.help-guide-section h4 {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 11px;
+  letter-spacing: 2px;
+  color: var(--accent-green);
+  margin-bottom: 10px;
+  text-transform: uppercase;
+}
+
+.guide-question-text {
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--text-bright);
+  margin-bottom: 10px;
+}
+
+.guide-options {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.guide-option-btn {
+  padding: 8px 12px;
+  border: 1px solid var(--panel-border);
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.02);
+  color: var(--text-primary);
+  font-family: 'Exo 2', sans-serif;
+  font-size: 13px;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.2s;
+}
+
+.guide-option-btn:hover {
+  border-color: rgba(0, 230, 118, 0.3);
+  background: rgba(0, 230, 118, 0.05);
+}
+
+.guide-option-btn.correct-answer {
+  border-color: var(--success);
+  background: rgba(0, 230, 118, 0.15);
+  color: var(--success);
+}
+
+.guide-option-btn.wrong-answer {
+  border-color: var(--error);
+  background: rgba(255, 68, 68, 0.1);
+  color: var(--error);
+}
+
+/* Responsive help panel */
+@media (max-width: 900px) {
+  .help-panel {
+    width: 300px;
+  }
 }
 </style>
 </head>
@@ -741,6 +1090,10 @@ body {
       <button class="exercise-btn" data-mode="position">
         <div class="ex-icon pos">📍</div>
         <div class="ex-info"><div class="ex-name">Identificar Posición</div><div class="ex-desc">¿Dónde estás respecto al VOR?</div></div>
+      </button>
+      <button class="exercise-btn" data-mode="locate">
+        <div class="ex-icon loc">👁</div>
+        <div class="ex-info"><div class="ex-name">Localizar Avión</div><div class="ex-desc">Solo con el instrumento, ¿dónde estás?</div></div>
       </button>
       <button class="exercise-btn" data-mode="radial">
         <div class="ex-icon rad">🧭</div>
@@ -874,6 +1227,22 @@ body {
       <div class="prompt-text" id="promptText">Arrastra el avión por el mapa y observa cómo responde el instrumento VOR. Ajusta el OBS para explorar diferentes radiales.</div>
       <div class="prompt-actions" id="promptActions"></div>
     </div>
+
+    <!-- Help button (hidden by default, shown during exercises) -->
+    <button class="help-btn hidden" id="helpBtn" title="Ayuda contextual">?</button>
+    <div class="help-nudge" id="helpNudge">¿Necesitas ayuda?</div>
+  </div>
+</div>
+
+<!-- Help overlay and panel (outside main-container) -->
+<div class="help-overlay" id="helpOverlay"></div>
+<div class="help-panel" id="helpPanel">
+  <div class="help-panel-header">
+    <h3>AYUDA</h3>
+    <button class="help-close-btn" id="helpCloseBtn">&times;</button>
+  </div>
+  <div class="help-panel-body" id="helpPanelBody">
+    <!-- Dynamic content injected by JS -->
   </div>
 </div>
 
@@ -926,6 +1295,13 @@ const APP = {
 
   // Audio
   audioCtx: null,
+
+  // Help system
+  hintsUsed: 0,
+  hintsRevealed: [false, false, false],
+  helpOpen: false,
+  inactivityTimer: null,
+  inactivityNudgeTimer: null,
 };
 
 // ═══════════ AUDIO ═══════════
@@ -1661,6 +2037,7 @@ function getMapPos(e) {
 
 canvas.addEventListener('mousedown', (e) => {
   if (APP.mode === 'passage' && APP.passagePlaying) return;
+  if (APP.locateDragDisabled) return;
   const pos = getMapPos(e);
   const dist = distanceBetween(pos.x, pos.y, APP.aircraft.x, APP.aircraft.y);
   if (dist < 0.05 || APP.mode === 'free') {
@@ -1781,19 +2158,40 @@ function setMode(mode) {
   APP.mode = mode;
   APP.passagePlaying = false;
   APP.exercise = null;
+  APP.locateDragDisabled = (mode === 'locate');
 
   // Toggle instrument visibility
   document.getElementById('singleInstrument').classList.toggle('hidden', mode === 'triangulation');
   document.getElementById('dualInstrument').classList.toggle('hidden', mode !== 'triangulation');
+
+  // Toggle map visibility for "locate" exercise
+  document.querySelector('.map-container').classList.toggle('map-hidden', mode === 'locate');
 
   // Update sidebar
   document.querySelectorAll('.exercise-btn').forEach(b => {
     b.classList.toggle('active', b.dataset.mode === mode);
   });
 
+  // Help system: show/hide help button (not in free mode)
+  const helpBtn = document.getElementById('helpBtn');
+  const isExerciseMode = mode !== 'free';
+  helpBtn.classList.toggle('hidden', !isExerciseMode);
+
+  // Reset help state for new exercise
+  resetHints();
+  closeHelp();
+
+  // Manage inactivity timer
+  if (isExerciseMode) {
+    startInactivityTimer();
+  } else {
+    clearInactivityTimer();
+  }
+
   switch (mode) {
     case 'free': startFreeMode(); break;
     case 'position': generatePositionExercise(); break;
+    case 'locate': generateLocateExercise(); break;
     case 'radial': generateRadialExercise(); break;
     case 'obs': generateOBSExercise(); break;
     case 'passage': startPassageMode(); break;
@@ -1919,6 +2317,139 @@ function handlePositionAnswer(selected, correct, btnEl) {
 
   // Add next button
   addNextButton(() => generatePositionExercise());
+}
+
+// — LOCATE AIRCRAFT (instrument-only) —
+function generateLocateExercise() {
+  // Place aircraft randomly
+  const angle = Math.random() * 360;
+  const dist = 0.15 + Math.random() * 0.25;
+  const rad = angle * Math.PI / 180;
+  APP.aircraft.x = APP.vor1.x + dist * Math.sin(rad);
+  APP.aircraft.y = APP.vor1.y - dist * Math.cos(rad);
+  APP.aircraft.x = Math.max(0.05, Math.min(0.95, APP.aircraft.x));
+  APP.aircraft.y = Math.max(0.05, Math.min(0.95, APP.aircraft.y));
+
+  // Set OBS — in easy mode use cardinal-ish, in medium/hard use any
+  const obsOptions = APP.difficulty === 'easy' ?
+    [0, 30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330] :
+    APP.difficulty === 'medium' ?
+    [0, 15, 30, 45, 60, 75, 90, 105, 120, 135, 150, 165, 180, 195, 210, 225, 240, 255, 270, 285, 300, 315, 330, 345] :
+    Array.from({length: 36}, (_, i) => i * 10);
+  const obs = obsOptions[Math.floor(Math.random() * obsOptions.length)] || 360;
+  APP.obs = obs === 0 ? 360 : obs;
+  setOBS(APP.obs);
+
+  // Compute VOR data
+  const vor = computeVOR(APP.aircraft.x, APP.aircraft.y, APP.vor1.x, APP.vor1.y, APP.obs);
+
+  // Generate answer options — 4 compass octants with descriptions
+  const actualRadial = Math.round(vor.radial);
+
+  // Determine the correct octant
+  function getOctant(r) {
+    r = ((r % 360) + 360) % 360;
+    if (r >= 338 || r < 23) return 'N';
+    if (r >= 23 && r < 68) return 'NE';
+    if (r >= 68 && r < 113) return 'E';
+    if (r >= 113 && r < 158) return 'SE';
+    if (r >= 158 && r < 203) return 'S';
+    if (r >= 203 && r < 248) return 'SO';
+    if (r >= 248 && r < 293) return 'O';
+    return 'NO';
+  }
+
+  const octantNames = {
+    'N': 'Norte', 'NE': 'Noreste', 'E': 'Este', 'SE': 'Sureste',
+    'S': 'Sur', 'SO': 'Suroeste', 'O': 'Oeste', 'NO': 'Noroeste'
+  };
+
+  const correctOctant = getOctant(actualRadial);
+
+  // For easy mode: 4 options (quadrants)
+  // For medium/hard: 8 options (octants)
+  let allOptions, correctLabel;
+
+  if (APP.difficulty === 'easy') {
+    const quadrants = ['N', 'E', 'S', 'O'];
+    const quadrantMap = { 'N': 'N', 'NE': 'NE→E', 'E': 'E', 'SE': 'SE→S', 'S': 'S', 'SO': 'SO→O', 'O': 'O', 'NO': 'NO→N' };
+    const correctQuadrant = ['N', 'NE'].includes(correctOctant) ? 'N' :
+                            ['E', 'SE'].includes(correctOctant) ? 'E' :
+                            ['S', 'SO'].includes(correctOctant) ? 'S' : 'O';
+    correctLabel = octantNames[correctQuadrant] || correctQuadrant;
+    allOptions = quadrants.map(q => ({
+      text: `${octantNames[q]} del VOR`,
+      correct: q === correctQuadrant
+    }));
+  } else {
+    const octants = ['N', 'NE', 'E', 'SE', 'S', 'SO', 'O', 'NO'];
+    correctLabel = octantNames[correctOctant];
+    // Pick 4 options including the correct one
+    let wrongOctants = octants.filter(o => o !== correctOctant);
+    // Shuffle and pick 3
+    for (let i = wrongOctants.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [wrongOctants[i], wrongOctants[j]] = [wrongOctants[j], wrongOctants[i]];
+    }
+    const selected = [correctOctant, ...wrongOctants.slice(0, 3)];
+    // Shuffle
+    for (let i = selected.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [selected[i], selected[j]] = [selected[j], selected[i]];
+    }
+    allOptions = selected.map(o => ({
+      text: `${octantNames[o]} del VOR`,
+      correct: o === correctOctant
+    }));
+  }
+
+  APP.exercise = {
+    type: 'locate',
+    correctOctant,
+    actualRadial,
+    options: allOptions
+  };
+
+  // Disable aircraft dragging in this mode
+  APP.locateDragDisabled = true;
+
+  document.getElementById('promptTitle').textContent = 'LOCALIZAR AVIÓN';
+  document.getElementById('promptText').textContent = `El mapa está oculto. Observa el instrumento VOR con OBS en ${APP.obs}°. La bandera muestra ${vor.flag} y el CDI ${Math.abs(vor.cdiNormalized) < 0.15 ? 'está centrado' : 'está deflectado a la ' + (vor.cdiNormalized > 0 ? 'derecha' : 'izquierda')}. ¿En qué dirección respecto al VOR está el avión?`;
+
+  const actionsDiv = document.getElementById('promptActions');
+  actionsDiv.innerHTML = allOptions.map((opt, i) =>
+    `<button class="answer-btn" data-idx="${i}">${opt.text}</button>`
+  ).join('');
+
+  actionsDiv.querySelectorAll('.answer-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const idx = parseInt(btn.dataset.idx);
+      const isCorrect = allOptions[idx].correct;
+
+      actionsDiv.querySelectorAll('.answer-btn').forEach(b => b.disabled = true);
+      btn.style.background = isCorrect ? 'rgba(0,230,118,0.3)' : 'rgba(255,68,68,0.3)';
+      if (!isCorrect) {
+        actionsDiv.querySelectorAll('.answer-btn').forEach(b => {
+          if (allOptions[parseInt(b.dataset.idx)].correct) {
+            b.style.background = 'rgba(0,230,118,0.3)';
+          }
+        });
+      }
+
+      recordAnswer(isCorrect);
+
+      // Reveal map after answering
+      document.querySelector('.map-container').classList.remove('map-hidden');
+
+      const explanation = `El avión está al ${correctLabel} del VOR, en el radial R-${actualRadial.toString().padStart(3,'0')}. ` +
+        `Con OBS ${APP.obs}° y bandera ${vor.flag}, el CDI ${Math.abs(vor.cdiNormalized) < 0.15 ? 'centrado indica que estás sobre ese radial' : 'deflectado indica tu posición relativa al radial seleccionado'}.`;
+      showExplanation(isCorrect, explanation);
+
+      addNextButton(() => generateLocateExercise());
+    });
+  });
+
+  update();
 }
 
 // — RADIAL IDENTIFICATION —
@@ -2301,12 +2832,24 @@ function describeCDI(normalized) {
 }
 
 function recordAnswer(correct) {
+  // Clear inactivity timer when answer is submitted
+  clearInactivityTimer();
+
   if (correct) {
     APP.correct++;
     APP.streak++;
     if (APP.streak > APP.bestStreak) APP.bestStreak = APP.streak;
-    APP.totalPoints += APP.difficulty === 'easy' ? 10 : APP.difficulty === 'medium' ? 20 : 30;
-    APP.totalPoints += APP.streak * 2; // streak bonus
+    let basePoints = APP.difficulty === 'easy' ? 10 : APP.difficulty === 'medium' ? 20 : 30;
+    let streakBonus = APP.streak * 2;
+    let totalEarned = basePoints + streakBonus;
+
+    // Apply hint penalty: -20% per hint used
+    if (APP.hintsUsed > 0) {
+      const penalty = 1 - (0.2 * APP.hintsUsed);
+      totalEarned = Math.max(0, Math.round(totalEarned * penalty));
+    }
+
+    APP.totalPoints += totalEarned;
     playSuccess();
   } else {
     APP.wrong++;
@@ -2397,6 +2940,387 @@ function init() {
   // Start animation loops
   passageAnimLoop();
 }
+
+// ═══════════ CONTEXTUAL HELP SYSTEM ═══════════
+
+const HINTS = {
+  position: {
+    explanation: 'En este ejercicio debes identificar tu posición relativa al VOR usando las indicaciones del instrumento. La bandera TO/FROM y la deflexión del CDI te dan toda la información necesaria.',
+    getHints: function() {
+      const vor = computeVOR(APP.aircraft.x, APP.aircraft.y, APP.vor1.x, APP.vor1.y, APP.obs);
+      const cdiDesc = describeCDI(vor.cdiNormalized);
+      const cdiDir = vor.cdiNormalized > 0.1 ? 'derecha' : vor.cdiNormalized < -0.1 ? 'izquierda' : 'centrado';
+      const quadrant = vor.radial <= 90 ? 'noreste' : vor.radial <= 180 ? 'sureste' : vor.radial <= 270 ? 'suroeste' : 'noroeste';
+
+      return [
+        `La bandera TO/FROM es clave: si muestra FROM, significa que el curso seleccionado en el OBS va DESDE la estación hacia tu lado. Si muestra TO, el curso seleccionado apunta hacia la estación desde donde estás.`,
+        `La bandera muestra ${vor.flag}${vor.flag === 'FROM' ? ', lo que significa que estás en el lado del radial seleccionado (OBS ' + APP.obs + '°)' : vor.flag === 'TO' ? ', lo que significa que estás del lado opuesto al radial seleccionado' : ''}. El CDI está ${cdiDesc}, ${cdiDir !== 'centrado' ? 'lo que indica desviación hacia la ' + cdiDir : 'lo que indica que estás sobre el radial seleccionado'}.`,
+        `Combina la información: con OBS en ${APP.obs}° y bandera ${vor.flag}, tu radial es aproximadamente R-${vor.radial.toString().padStart(3, '0')}. Estás al ${quadrant} de la estación VOR.`
+      ];
+    },
+    guideQuestion: function() {
+      const vor = computeVOR(APP.aircraft.x, APP.aircraft.y, APP.vor1.x, APP.vor1.y, APP.obs);
+      return {
+        text: '¿Qué nos indica la bandera FROM en un instrumento VOR?',
+        options: [
+          { text: 'Que volamos hacia la estación', correct: false },
+          { text: 'Que el curso seleccionado va desde la estación hacia nuestro lado', correct: true },
+          { text: 'Que el VOR está fuera de rango', correct: false },
+          { text: 'Que debemos cambiar el OBS', correct: false }
+        ]
+      };
+    }
+  },
+
+  locate: {
+    explanation: 'En este ejercicio el mapa está oculto. Debes determinar tu posición relativa al VOR usando SOLO la información del instrumento: la bandera TO/FROM, el OBS seleccionado, y la deflexión del CDI.',
+    getHints: function() {
+      const vor = computeVOR(APP.aircraft.x, APP.aircraft.y, APP.vor1.x, APP.vor1.y, APP.obs);
+      const cdiDir = vor.cdiNormalized > 0.1 ? 'derecha' : vor.cdiNormalized < -0.1 ? 'izquierda' : 'centrado';
+
+      return [
+        `Piensa paso a paso: primero mira la bandera (TO o FROM). FROM significa que el radial seleccionado apunta hacia tu lado. TO significa lo opuesto. El CDI te dice cuánto estás desviado del radial del OBS.`,
+        `La bandera muestra ${vor.flag} con OBS en ${APP.obs}°. ${vor.flag === 'FROM' ? 'Estás en el hemisferio del radial ' + APP.obs + '°, es decir, el OBS apunta hacia donde tú estás.' : vor.flag === 'TO' ? 'Estás en el lado opuesto al radial ' + APP.obs + '°, el OBS apunta DESDE ti hacia la estación.' : 'Estás en el cono de confusión, cerca de la estación.'} El CDI ${cdiDir === 'centrado' ? 'centrado indica que estás sobre ese radial exacto.' : 'deflectado a la ' + cdiDir + ' indica que debes corregir en esa dirección.'}`,
+        `Tu radial real es R-${vor.radial.toString().padStart(3, '0')}. ${vor.radial <= 90 ? 'Estás al noreste del VOR.' : vor.radial <= 180 ? 'Estás al sureste del VOR.' : vor.radial <= 270 ? 'Estás al suroeste del VOR.' : 'Estás al noroeste del VOR.'}`
+      ];
+    },
+    guideQuestion: function() {
+      return {
+        text: 'Si el OBS marca 090° con bandera FROM y CDI centrado, ¿dónde estás?',
+        options: [
+          { text: 'Al este del VOR, en el radial 090', correct: true },
+          { text: 'Al oeste del VOR, volando hacia el este', correct: false },
+          { text: 'Al norte del VOR', correct: false },
+          { text: 'Sobre la estación VOR', correct: false }
+        ]
+      };
+    }
+  },
+
+  radial: {
+    explanation: 'Los radiales son líneas magnéticas que emanan DESDE la estación VOR en todas direcciones, como los rayos de una rueda. El radial en el que estás es el rumbo magnético desde el VOR hasta tu posición.',
+    getHints: function() {
+      const vor = computeVOR(APP.aircraft.x, APP.aircraft.y, APP.vor1.x, APP.vor1.y, APP.obs);
+      const correctRadial = vor.radial;
+
+      return [
+        `Para identificar tu radial: centra el CDI girando el OBS hasta que la aguja esté en el centro, y asegúrate de que la bandera muestre FROM. El valor del OBS en ese momento es tu radial.`,
+        `Observa la posición del avión en el mapa respecto a la estación. Si estás al norte del VOR, estarás cerca del radial 360. Si estás al este, cerca del 090. El OBS actual es ${APP.obs}° y el CDI está ${describeCDI(vor.cdiNormalized)}.`,
+        `Tu radial actual es R-${correctRadial.toString().padStart(3, '0')}. Para verificarlo, gira el OBS a ${correctRadial}° con bandera FROM, y el CDI se centrará.`
+      ];
+    },
+    guideQuestion: function() {
+      return {
+        text: '¿Cómo se determina el radial en el que te encuentras?',
+        options: [
+          { text: 'Leyendo solo la bandera TO/FROM', correct: false },
+          { text: 'Centrando el CDI con bandera FROM y leyendo el OBS', correct: true },
+          { text: 'Mirando la distancia al VOR', correct: false },
+          { text: 'El radial es siempre igual al OBS', correct: false }
+        ]
+      };
+    }
+  },
+
+  obs: {
+    explanation: 'Ajustar el OBS correctamente es fundamental para la navegación VOR. Para volar INBOUND (hacia la estación), selecciona el curso recíproco del radial (radial + 180°) para obtener bandera TO. Para OUTBOUND (desde la estación), selecciona el radial directamente para obtener FROM.',
+    getHints: function() {
+      if (!APP.exercise) return ['', '', ''];
+      const targetRadial = APP.exercise.targetRadial;
+      const inbound = APP.exercise.inbound;
+      const expectedOBS = APP.exercise.expectedOBS;
+      const currentDiff = Math.abs(angleDiff(APP.obs, expectedOBS));
+
+      return [
+        `Pregúntate: ¿hacia dónde quiero volar? Si es ${inbound ? 'INBOUND (hacia la estación)' : 'OUTBOUND (desde la estación)'}, necesitas que la bandera muestre ${inbound ? 'TO' : 'FROM'} con el CDI centrado.`,
+        `Para navegar ${inbound ? 'inbound' : 'outbound'} por el radial R-${targetRadial.toString().padStart(3, '0')}: ${inbound ? 'selecciona el recíproco del radial, que es ' + expectedOBS + '°, para obtener bandera TO' : 'selecciona el radial directamente (' + expectedOBS + '°) para obtener bandera FROM'}. Tu OBS actual (${APP.obs}°) ${currentDiff <= 5 ? 'está muy cerca' : 'necesita ajuste'}.`,
+        `El OBS correcto es ${expectedOBS}°. ${inbound ? 'Radial ' + targetRadial + '° + 180° = ' + expectedOBS + '° (inbound con TO)' : 'Selecciona directamente ' + expectedOBS + '° (outbound con FROM)'}. ${currentDiff <= 5 ? '¡Casi lo tienes!' : 'Gira el OBS ' + (currentDiff > 90 ? 'significativamente' : 'un poco') + ' para llegar al valor correcto.'}`
+      ];
+    },
+    guideQuestion: function() {
+      return {
+        text: '¿Cuál es la diferencia entre navegar inbound y outbound por un radial?',
+        options: [
+          { text: 'Inbound usa TO, outbound usa FROM, y el OBS difiere en 180°', correct: true },
+          { text: 'No hay diferencia, solo cambia la velocidad', correct: false },
+          { text: 'Inbound significa con viento a favor', correct: false },
+          { text: 'Outbound siempre requiere OBS en 360°', correct: false }
+        ]
+      };
+    }
+  },
+
+  passage: {
+    explanation: 'Este ejercicio demuestra qué sucede cuando vuelas directamente sobre una estación VOR. Observa cómo la bandera cambia de TO a FROM al cruzar la estación, y cómo el CDI se vuelve inestable en el "cono de confusión" justo encima del VOR.',
+    getHints: function() {
+      const vor = computeVOR(APP.aircraft.x, APP.aircraft.y, APP.vor1.x, APP.vor1.y, APP.obs);
+      return [
+        `Fíjate en la bandera TO/FROM durante el vuelo. Antes de llegar a la estación mostrará TO (vuelas hacia ella). Después de pasarla, cambiará a FROM (te alejas de ella).`,
+        `Cuando el avión está muy cerca de la estación (en el "cono de confusión"), la bandera mostrará OFF y el CDI oscilará. Esto es normal. La bandera actual es: ${vor.flag}. Distancia: ${(vor.distance * 100).toFixed(1)} nm.`,
+        `El paso por estación se confirma cuando: 1) La bandera cambia de TO a FROM, 2) El CDI se vuelve momentáneamente inestable, 3) La bandera OFF aparece brevemente. Este es un punto de referencia de navegación importante.`
+      ];
+    },
+    guideQuestion: function() {
+      return {
+        text: '¿Qué indica el cambio de bandera de TO a FROM durante el vuelo?',
+        options: [
+          { text: 'Que el VOR dejó de funcionar', correct: false },
+          { text: 'Que has pasado por encima de la estación VOR', correct: true },
+          { text: 'Que necesitas cambiar el OBS', correct: false },
+          { text: 'Que estás fuera de rango del VOR', correct: false }
+        ]
+      };
+    }
+  },
+
+  intercept: {
+    explanation: 'Para interceptar un radial: primero configura el OBS al valor correcto (radial para FROM/outbound, o recíproco para TO/inbound). Luego arrastra el avión hacia donde el CDI se centra. Cuando el CDI está centrado y la bandera es correcta, estás sobre el radial.',
+    getHints: function() {
+      if (!APP.exercise) return ['', '', ''];
+      const targetRadial = APP.exercise.targetRadial;
+      const inbound = APP.exercise.inbound;
+      const expectedOBS = APP.exercise.expectedOBS;
+      const vor = computeVOR(APP.aircraft.x, APP.aircraft.y, APP.vor1.x, APP.vor1.y, APP.obs);
+      const cdiDir = vor.cdiNormalized > 0.1 ? 'derecha' : vor.cdiNormalized < -0.1 ? 'izquierda' : 'centrado';
+
+      return [
+        `Primer paso: ajusta el OBS al valor correcto para el radial R-${targetRadial.toString().padStart(3, '0')} ${inbound ? 'inbound' : 'outbound'}. Necesitas bandera ${inbound ? 'TO' : 'FROM'} cuando estés sobre el radial.`,
+        `El OBS debería estar en ${expectedOBS}°. ${Math.abs(angleDiff(APP.obs, expectedOBS)) <= 5 ? '¡OBS correcto!' : 'Ajusta el OBS a ' + expectedOBS + '°.'} Ahora mira el CDI: está ${cdiDir !== 'centrado' ? 'deflectado a la ' + cdiDir + '. Vuela (arrastra el avión) hacia la ' + cdiDir + ' para centrarlo.' : 'centrado. ¡Verifica la bandera!'}`,
+        `OBS en ${expectedOBS}°, ${inbound ? 'bandera TO' : 'bandera FROM'}, CDI centrado. Arrastra el avión sobre la línea del radial R-${targetRadial.toString().padStart(3, '0')} en el mapa hasta que el CDI se centre. La bandera debe mostrar ${inbound ? 'TO' : 'FROM'}.`
+      ];
+    },
+    guideQuestion: function() {
+      return {
+        text: '¿Hacia dónde debes volar cuando el CDI está deflectado a la derecha?',
+        options: [
+          { text: 'Hacia la izquierda, opuesto al CDI', correct: false },
+          { text: 'Hacia la derecha, hacia donde apunta el CDI', correct: true },
+          { text: 'Recto, ignorar el CDI', correct: false },
+          { text: 'Depende solo de la bandera TO/FROM', correct: false }
+        ]
+      };
+    }
+  },
+
+  triangulation: {
+    explanation: 'La triangulación (cross-fix) usa dos estaciones VOR para fijar tu posición exacta. Centra el CDI de cada instrumento por separado con bandera FROM. La intersección de ambos radiales es tu posición.',
+    getHints: function() {
+      const v1 = computeVOR(APP.aircraft.x, APP.aircraft.y, APP.vor1.x, APP.vor1.y, APP.obs2a);
+      const v2 = computeVOR(APP.aircraft.x, APP.aircraft.y, APP.vor2.x, APP.vor2.y, APP.obs2b);
+
+      return [
+        `Trabaja con un VOR a la vez. Primero, gira el OBS del VOR 1 hasta que el CDI se centre y la bandera muestre FROM. Luego haz lo mismo con el VOR 2.`,
+        `VOR 1: el CDI está ${describeCDI(v1.cdiNormalized)} con bandera ${v1.flag}. ${Math.abs(v1.cdiNormalized) < 0.2 && v1.flag === 'FROM' ? '¡Bien!' : 'Sigue girando el OBS hasta centrar con FROM.'} VOR 2: el CDI está ${describeCDI(v2.cdiNormalized)} con bandera ${v2.flag}. ${Math.abs(v2.cdiNormalized) < 0.2 && v2.flag === 'FROM' ? '¡Bien!' : 'Ajusta el OBS del VOR 2.'}`,
+        `Tu posición es: VOR 1 R-${v1.radial.toString().padStart(3, '0')} / VOR 2 R-${v2.radial.toString().padStart(3, '0')}. Pon el OBS del VOR 1 en ${v1.radial}° y el del VOR 2 en ${v2.radial}°, ambos con bandera FROM y CDI centrado.`
+      ];
+    },
+    guideQuestion: function() {
+      return {
+        text: '¿Por qué se necesitan dos estaciones VOR para triangular?',
+        options: [
+          { text: 'Porque un solo VOR no funciona correctamente', correct: false },
+          { text: 'Un radial da una línea de posición; se necesitan dos líneas para un punto', correct: true },
+          { text: 'Porque la regulación exige dos receptores', correct: false },
+          { text: 'Para tener una frecuencia de respaldo', correct: false }
+        ]
+      };
+    }
+  }
+};
+
+// ─── Help System Functions ───
+
+function toggleHelp() {
+  if (APP.helpOpen) {
+    closeHelp();
+  } else {
+    openHelp();
+  }
+}
+
+function openHelp() {
+  APP.helpOpen = true;
+  document.getElementById('helpPanel').classList.add('active');
+  document.getElementById('helpOverlay').classList.add('active');
+  document.getElementById('helpBtn').classList.add('active');
+
+  // Hide nudge when help is opened
+  document.getElementById('helpNudge').classList.remove('visible');
+
+  // Generate help content for current exercise type
+  const exerciseType = APP.mode;
+  if (HINTS[exerciseType]) {
+    renderHelpPanel(exerciseType);
+  }
+
+  // Reset inactivity since user interacted
+  resetInactivityTimer();
+}
+
+function closeHelp() {
+  APP.helpOpen = false;
+  document.getElementById('helpPanel').classList.remove('active');
+  document.getElementById('helpOverlay').classList.remove('active');
+  document.getElementById('helpBtn').classList.remove('active');
+}
+
+function renderHelpPanel(exerciseType) {
+  const hintData = HINTS[exerciseType];
+  if (!hintData) return;
+
+  const hints = hintData.getHints();
+  const guide = hintData.guideQuestion();
+  const body = document.getElementById('helpPanelBody');
+
+  let html = '';
+
+  // Explanation section
+  html += `
+    <div class="help-explanation">
+      <h4>Sobre este ejercicio</h4>
+      <p>${hintData.explanation}</p>
+    </div>
+  `;
+
+  // Hints section
+  html += `<div class="help-hints-title">Pistas progresivas</div>`;
+
+  for (let i = 0; i < 3; i++) {
+    const revealed = APP.hintsRevealed[i];
+    const locked = !revealed && (i > 0 && !APP.hintsRevealed[i - 1]);
+    const disabled = locked || (APP.exercise && APP.exercise.answered);
+
+    html += `
+      <div class="help-hint-item">
+        <button class="hint-btn ${revealed ? 'revealed' : ''}"
+                id="hintBtn${i}"
+                ${disabled ? 'disabled' : ''}
+                onclick="revealHint(${i})">
+          <span class="hint-label">${revealed ? '&#10003;' : '&#128274;'} Pista ${i + 1}</span>
+          <span class="hint-penalty">${revealed ? 'Usada' : '(-20% por pista)'}</span>
+        </button>
+        <div class="hint-content ${revealed ? 'visible' : ''}" id="hintContent${i}">
+          ${revealed ? hints[i] : ''}
+        </div>
+      </div>
+    `;
+  }
+
+  // Guide question section
+  html += `
+    <div class="help-guide-section">
+      <h4>Pregunta guía</h4>
+      <p class="guide-question-text">${guide.text}</p>
+      <div class="guide-options" id="guideOptions">
+  `;
+
+  const shuffledOptions = guide.options.sort(() => Math.random() - 0.5);
+  shuffledOptions.forEach((opt, idx) => {
+    html += `
+      <button class="guide-option-btn"
+              onclick="handleGuideAnswer(this, ${opt.correct})"
+              data-correct="${opt.correct}">
+        ${opt.text}
+      </button>
+    `;
+  });
+
+  html += `
+      </div>
+    </div>
+  `;
+
+  body.innerHTML = html;
+}
+
+function revealHint(level) {
+  // Can only reveal sequentially
+  if (level > 0 && !APP.hintsRevealed[level - 1]) return;
+  if (APP.hintsRevealed[level]) return;
+  if (APP.exercise && APP.exercise.answered) return;
+
+  APP.hintsRevealed[level] = true;
+  APP.hintsUsed++;
+
+  // Re-render the help panel with updated state
+  const exerciseType = APP.mode;
+  if (HINTS[exerciseType]) {
+    renderHelpPanel(exerciseType);
+  }
+
+  // Reset inactivity timer
+  resetInactivityTimer();
+}
+
+function handleGuideAnswer(btnEl, isCorrect) {
+  // Prevent multiple clicks
+  const optionBtns = document.querySelectorAll('.guide-option-btn');
+  const alreadyAnswered = Array.from(optionBtns).some(b =>
+    b.classList.contains('correct-answer') || b.classList.contains('wrong-answer')
+  );
+  if (alreadyAnswered) return;
+
+  if (isCorrect) {
+    btnEl.classList.add('correct-answer');
+  } else {
+    btnEl.classList.add('wrong-answer');
+    // Also highlight the correct one
+    optionBtns.forEach(b => {
+      if (b.dataset.correct === 'true') b.classList.add('correct-answer');
+    });
+  }
+}
+
+function resetHints() {
+  APP.hintsUsed = 0;
+  APP.hintsRevealed = [false, false, false];
+  document.getElementById('helpNudge').classList.remove('visible');
+}
+
+// ─── Inactivity Timer ───
+
+function startInactivityTimer() {
+  clearInactivityTimer();
+
+  APP.inactivityTimer = setTimeout(() => {
+    // Only show nudge if help is not open and exercise is active and not answered
+    if (!APP.helpOpen && APP.mode !== 'free' && (!APP.exercise || !APP.exercise.answered)) {
+      document.getElementById('helpNudge').classList.add('visible');
+    }
+  }, 30000); // 30 seconds
+}
+
+function resetInactivityTimer() {
+  document.getElementById('helpNudge').classList.remove('visible');
+  // Only restart if in exercise mode
+  if (APP.mode !== 'free') {
+    clearInactivityTimer();
+    startInactivityTimer();
+  }
+}
+
+function clearInactivityTimer() {
+  if (APP.inactivityTimer) {
+    clearTimeout(APP.inactivityTimer);
+    APP.inactivityTimer = null;
+  }
+  document.getElementById('helpNudge').classList.remove('visible');
+}
+
+// ─── Help Event Listeners ───
+
+document.getElementById('helpBtn').addEventListener('click', toggleHelp);
+document.getElementById('helpCloseBtn').addEventListener('click', closeHelp);
+document.getElementById('helpOverlay').addEventListener('click', closeHelp);
+
+// Reset inactivity on any user interaction during exercises
+['click', 'mousedown', 'touchstart', 'keydown'].forEach(evt => {
+  document.addEventListener(evt, () => {
+    if (APP.mode !== 'free') {
+      resetInactivityTimer();
+    }
+  }, { passive: true });
+});
 
 init();
 </script>
