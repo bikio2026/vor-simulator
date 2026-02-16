@@ -1,0 +1,2289 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VOR Navigator — Simulador de Navegación</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;900&family=Share+Tech+Mono&family=Exo+2:wght@300;400;500;600;700&display=swap');
+
+:root {
+  --cockpit-bg: #0a0c10;
+  --panel-bg: #12151c;
+  --panel-border: #1e2330;
+  --instrument-bg: #0d0f14;
+  --bezel-outer: #2a2d35;
+  --bezel-inner: #1a1d25;
+  --needle-white: #e8e8e8;
+  --flag-to: #00cc66;
+  --flag-from: #e84040;
+  --accent-amber: #ffb020;
+  --accent-cyan: #00d4ff;
+  --accent-green: #00e676;
+  --text-primary: #c8ccd4;
+  --text-dim: #6a7080;
+  --text-bright: #f0f2f5;
+  --radial-line: rgba(0, 212, 255, 0.15);
+  --map-grid: rgba(0, 212, 255, 0.06);
+  --success: #00e676;
+  --error: #ff4444;
+  --warning: #ffb020;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  background: var(--cockpit-bg);
+  color: var(--text-primary);
+  font-family: 'Exo 2', sans-serif;
+  overflow-x: hidden;
+  min-height: 100vh;
+}
+
+/* ═══════════ HEADER ═══════════ */
+.app-header {
+  background: linear-gradient(180deg, #14171f 0%, var(--cockpit-bg) 100%);
+  border-bottom: 1px solid var(--panel-border);
+  padding: 12px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: relative;
+  z-index: 100;
+}
+
+.app-logo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.app-logo svg { width: 32px; height: 32px; }
+
+.app-logo h1 {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  background: linear-gradient(135deg, var(--accent-cyan), var(--accent-amber));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.app-logo .subtitle {
+  font-size: 12px;
+  color: var(--text-dim);
+  letter-spacing: 3px;
+  text-transform: uppercase;
+}
+
+.header-stats {
+  display: flex;
+  gap: 24px;
+  align-items: center;
+}
+
+.stat-item {
+  text-align: center;
+}
+
+.stat-value {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 18px;
+  color: var(--accent-amber);
+}
+
+.stat-label {
+  font-size: 11px;
+  color: var(--text-dim);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+
+/* ═══════════ MAIN LAYOUT ═══════════ */
+.main-container {
+  display: grid;
+  grid-template-columns: 280px 1fr 1fr;
+  grid-template-rows: 1fr;
+  gap: 0;
+  height: calc(100vh - 60px);
+}
+
+/* ═══════════ LEFT SIDEBAR ═══════════ */
+.sidebar {
+  background: var(--panel-bg);
+  border-right: 1px solid var(--panel-border);
+  overflow-y: auto;
+  padding: 16px;
+}
+
+.sidebar::-webkit-scrollbar { width: 4px; }
+.sidebar::-webkit-scrollbar-track { background: transparent; }
+.sidebar::-webkit-scrollbar-thumb { background: var(--panel-border); border-radius: 2px; }
+
+.section-title {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 11px;
+  letter-spacing: 3px;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--panel-border);
+}
+
+.exercise-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 24px;
+}
+
+.exercise-btn {
+  background: rgba(255,255,255,0.02);
+  border: 1px solid var(--panel-border);
+  border-radius: 8px;
+  padding: 10px 12px;
+  color: var(--text-primary);
+  font-family: 'Exo 2', sans-serif;
+  font-size: 13px;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.exercise-btn:hover {
+  background: rgba(0, 212, 255, 0.05);
+  border-color: rgba(0, 212, 255, 0.2);
+}
+
+.exercise-btn.active {
+  background: rgba(0, 212, 255, 0.08);
+  border-color: var(--accent-cyan);
+  color: var(--text-bright);
+}
+
+.exercise-btn .ex-icon {
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+.exercise-btn .ex-icon.free { background: rgba(0, 212, 255, 0.15); }
+.exercise-btn .ex-icon.pos { background: rgba(255, 176, 32, 0.15); }
+.exercise-btn .ex-icon.obs { background: rgba(0, 230, 118, 0.15); }
+.exercise-btn .ex-icon.pass { background: rgba(232, 64, 64, 0.15); }
+.exercise-btn .ex-icon.rad { background: rgba(160, 100, 255, 0.15); }
+.exercise-btn .ex-icon.intc { background: rgba(255, 100, 150, 0.15); }
+.exercise-btn .ex-icon.tri { background: rgba(100, 200, 255, 0.15); }
+
+.exercise-btn .ex-info {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.exercise-btn .ex-name {
+  font-weight: 600;
+  font-size: 13px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.exercise-btn .ex-desc {
+  font-size: 12px;
+  color: var(--text-dim);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Difficulty */
+.difficulty-selector {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 24px;
+}
+
+.diff-btn {
+  flex: 1;
+  padding: 8px;
+  border: 1px solid var(--panel-border);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--text-dim);
+  font-family: 'Exo 2', sans-serif;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-align: center;
+}
+
+.diff-btn:hover { border-color: var(--accent-cyan); color: var(--text-primary); }
+.diff-btn.active { background: rgba(0, 212, 255, 0.1); border-color: var(--accent-cyan); color: var(--accent-cyan); }
+
+/* Score panel */
+.score-panel {
+  background: rgba(0,0,0,0.3);
+  border-radius: 10px;
+  padding: 16px;
+  margin-bottom: 16px;
+}
+
+.score-display {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.score-item {
+  text-align: center;
+}
+
+.score-number {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 22px;
+  font-weight: 700;
+}
+
+.score-number.correct { color: var(--success); }
+.score-number.wrong { color: var(--error); }
+.score-number.streak { color: var(--accent-amber); }
+
+.score-sublabel {
+  font-size: 11px;
+  color: var(--text-dim);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.accuracy-bar {
+  height: 4px;
+  background: rgba(255,255,255,0.05);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.accuracy-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent-cyan), var(--accent-green));
+  border-radius: 2px;
+  transition: width 0.5s ease;
+}
+
+/* Feedback area */
+.feedback-area {
+  background: rgba(0,0,0,0.2);
+  border-radius: 10px;
+  padding: 14px;
+  min-height: 80px;
+  border: 1px solid var(--panel-border);
+}
+
+.feedback-area h4 {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 11px;
+  letter-spacing: 2px;
+  color: var(--text-dim);
+  margin-bottom: 8px;
+}
+
+.feedback-text {
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--text-primary);
+}
+
+.feedback-text.success { color: var(--success); }
+.feedback-text.error { color: var(--error); }
+.feedback-text.info { color: var(--accent-cyan); }
+
+/* ═══════════ MAP AREA ═══════════ */
+.map-container {
+  position: relative;
+  background: var(--cockpit-bg);
+  overflow: hidden;
+  border-right: 1px solid var(--panel-border);
+}
+
+.map-canvas {
+  width: 100%;
+  height: 100%;
+  cursor: crosshair;
+}
+
+.map-overlay-info {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  background: rgba(10, 12, 16, 0.85);
+  border: 1px solid var(--panel-border);
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 13px;
+  pointer-events: none;
+}
+
+.map-overlay-info div {
+  margin-bottom: 3px;
+}
+
+.map-label-cyan { color: var(--accent-cyan); }
+.map-label-amber { color: var(--accent-amber); }
+.map-label-green { color: var(--accent-green); }
+
+/* ═══════════ INSTRUMENT PANEL ═══════════ */
+.instrument-panel {
+  background: linear-gradient(180deg, #0e1018 0%, #0a0c10 50%, #0e1018 100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 20px;
+  overflow-y: auto;
+}
+
+.instrument-wrapper {
+  position: relative;
+  width: 340px;
+  height: 340px;
+  margin-bottom: 16px;
+  flex-shrink: 0;
+}
+
+/* VOR Instrument SVG styling */
+.vor-instrument {
+  width: 100%;
+  height: 100%;
+  filter: drop-shadow(0 4px 20px rgba(0,0,0,0.5));
+}
+
+/* OBS Controls */
+.obs-controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  margin-bottom: 20px;
+  width: 100%;
+  max-width: 340px;
+}
+
+.obs-knob-area {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.obs-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 2px solid var(--bezel-outer);
+  background: linear-gradient(145deg, #1e2130, #14161e);
+  color: var(--text-primary);
+  font-family: 'Orbitron', sans-serif;
+  font-size: 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s;
+  user-select: none;
+}
+
+.obs-btn:hover { border-color: var(--accent-cyan); color: var(--accent-cyan); }
+.obs-btn:active { transform: scale(0.92); background: linear-gradient(145deg, #14161e, #1e2130); }
+
+.obs-btn.fast {
+  width: 36px;
+  height: 36px;
+  font-size: 12px;
+}
+
+.obs-display {
+  background: #050608;
+  border: 2px solid var(--bezel-outer);
+  border-radius: 8px;
+  padding: 8px 16px;
+  text-align: center;
+  min-width: 90px;
+}
+
+.obs-display .obs-value {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--accent-green);
+  text-shadow: 0 0 10px rgba(0, 230, 118, 0.3);
+}
+
+.obs-display .obs-label {
+  font-size: 11px;
+  color: var(--text-dim);
+  letter-spacing: 3px;
+}
+
+/* Exercise prompt area */
+.exercise-prompt {
+  width: 100%;
+  max-width: 380px;
+  background: rgba(0,0,0,0.3);
+  border: 1px solid var(--panel-border);
+  border-radius: 10px;
+  padding: 16px;
+  margin-bottom: 16px;
+}
+
+.prompt-title {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 13px;
+  letter-spacing: 2px;
+  color: var(--accent-amber);
+  margin-bottom: 10px;
+}
+
+.prompt-text {
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--text-bright);
+  margin-bottom: 12px;
+}
+
+.prompt-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.answer-btn {
+  padding: 9px 18px;
+  border: 1px solid var(--panel-border);
+  border-radius: 6px;
+  background: rgba(255,255,255,0.03);
+  color: var(--text-primary);
+  font-family: 'Exo 2', sans-serif;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.answer-btn:hover {
+  border-color: var(--accent-cyan);
+  background: rgba(0, 212, 255, 0.08);
+}
+
+.answer-btn.selected {
+  border-color: var(--accent-cyan);
+  background: rgba(0, 212, 255, 0.15);
+  color: var(--accent-cyan);
+}
+
+.answer-btn.correct {
+  border-color: var(--success);
+  background: rgba(0, 230, 118, 0.15);
+  color: var(--success);
+}
+
+.answer-btn.incorrect {
+  border-color: var(--error);
+  background: rgba(255, 68, 68, 0.15);
+  color: var(--error);
+}
+
+.submit-btn {
+  padding: 10px 28px;
+  border: none;
+  border-radius: 6px;
+  background: linear-gradient(135deg, var(--accent-cyan), #0090b0);
+  color: #fff;
+  font-family: 'Orbitron', sans-serif;
+  font-size: 13px;
+  letter-spacing: 1px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.submit-btn:hover { transform: translateY(-1px); box-shadow: 0 4px 15px rgba(0, 212, 255, 0.3); }
+.submit-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; box-shadow: none; }
+
+.next-btn {
+  padding: 10px 28px;
+  border: 1px solid var(--accent-amber);
+  border-radius: 6px;
+  background: rgba(255, 176, 32, 0.1);
+  color: var(--accent-amber);
+  font-family: 'Orbitron', sans-serif;
+  font-size: 13px;
+  letter-spacing: 1px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.next-btn:hover { background: rgba(255, 176, 32, 0.2); }
+
+/* Input for OBS exercises */
+.obs-input-group {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.obs-input {
+  width: 80px;
+  padding: 8px 12px;
+  border: 1px solid var(--panel-border);
+  border-radius: 6px;
+  background: #050608;
+  color: var(--accent-green);
+  font-family: 'Orbitron', sans-serif;
+  font-size: 18px;
+  text-align: center;
+}
+
+.obs-input:focus {
+  outline: none;
+  border-color: var(--accent-cyan);
+}
+
+/* Timer */
+.timer-display {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 14px;
+  color: var(--accent-amber);
+  margin-bottom: 8px;
+}
+
+/* Passage animation controls */
+.passage-controls {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.play-btn {
+  padding: 9px 20px;
+  border: 1px solid var(--accent-green);
+  border-radius: 6px;
+  background: rgba(0, 230, 118, 0.1);
+  color: var(--accent-green);
+  font-family: 'Exo 2', sans-serif;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.play-btn:hover { background: rgba(0, 230, 118, 0.2); }
+
+.speed-select {
+  padding: 8px 12px;
+  border: 1px solid var(--panel-border);
+  border-radius: 6px;
+  background: #050608;
+  color: var(--text-primary);
+  font-family: 'Exo 2', sans-serif;
+  font-size: 13px;
+}
+
+/* ═══════════ HIDDEN WHEN NOT ACTIVE ═══════════ */
+.hidden { display: none !important; }
+
+/* ═══════════ RESPONSIVE ═══════════ */
+@media (max-width: 1100px) {
+  .main-container {
+    grid-template-columns: 240px 1fr 1fr;
+  }
+}
+
+@media (max-width: 900px) {
+  .main-container {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto 300px auto;
+  }
+  .sidebar {
+    border-right: none;
+    border-bottom: 1px solid var(--panel-border);
+    max-height: 200px;
+  }
+  .instrument-wrapper {
+    width: 280px;
+    height: 280px;
+  }
+}
+
+/* ═══════════ ANIMATIONS ═══════════ */
+@keyframes glow-pulse {
+  0%, 100% { opacity: 0.5; }
+  50% { opacity: 1; }
+}
+
+@keyframes slide-up {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.feedback-text { animation: slide-up 0.3s ease; }
+
+/* Second VOR instrument for triangulation */
+.instrument-pair {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+}
+
+.instrument-pair .instrument-wrapper {
+  width: 240px;
+  height: 240px;
+}
+
+.instrument-pair .obs-controls {
+  max-width: 240px;
+}
+
+.instrument-pair .obs-display .obs-value {
+  font-size: 20px;
+}
+
+.station-label {
+  text-align: center;
+  font-family: 'Orbitron', sans-serif;
+  font-size: 13px;
+  letter-spacing: 2px;
+  color: var(--accent-cyan);
+  margin-bottom: 6px;
+}
+
+/* Explanation panel */
+.explanation-box {
+  background: rgba(0, 212, 255, 0.05);
+  border: 1px solid rgba(0, 212, 255, 0.15);
+  border-radius: 8px;
+  padding: 12px;
+  margin-top: 10px;
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--text-primary);
+}
+
+.explanation-box strong {
+  color: var(--accent-cyan);
+}
+</style>
+</head>
+<body>
+
+<!-- ═══════════ HEADER ═══════════ -->
+<header class="app-header">
+  <div class="app-logo">
+    <svg viewBox="0 0 32 32" fill="none">
+      <circle cx="16" cy="16" r="14" stroke="url(#logoGrad)" stroke-width="2"/>
+      <line x1="16" y1="2" x2="16" y2="30" stroke="var(--accent-cyan)" stroke-width="0.5" opacity="0.3"/>
+      <line x1="2" y1="16" x2="30" y2="16" stroke="var(--accent-cyan)" stroke-width="0.5" opacity="0.3"/>
+      <circle cx="16" cy="16" r="3" fill="var(--accent-cyan)"/>
+      <circle cx="16" cy="16" r="6" stroke="var(--accent-amber)" stroke-width="1" stroke-dasharray="2 2"/>
+      <defs><linearGradient id="logoGrad" x1="0" y1="0" x2="32" y2="32"><stop stop-color="#00d4ff"/><stop offset="1" stop-color="#ffb020"/></linearGradient></defs>
+    </svg>
+    <div>
+      <h1>VOR NAVIGATOR</h1>
+      <div class="subtitle">Simulador de Navegación Aérea</div>
+    </div>
+  </div>
+  <div class="header-stats">
+    <div class="stat-item">
+      <div class="stat-value" id="totalScore">0</div>
+      <div class="stat-label">Puntos</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-value" id="totalAccuracy">—</div>
+      <div class="stat-label">Precisión</div>
+    </div>
+  </div>
+</header>
+
+<!-- ═══════════ MAIN ═══════════ -->
+<div class="main-container">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="section-title">Ejercicios</div>
+    <div class="exercise-list">
+      <button class="exercise-btn active" data-mode="free">
+        <div class="ex-icon free">✈</div>
+        <div class="ex-info"><div class="ex-name">Práctica Libre</div><div class="ex-desc">Explora el VOR sin presión</div></div>
+      </button>
+      <button class="exercise-btn" data-mode="position">
+        <div class="ex-icon pos">📍</div>
+        <div class="ex-info"><div class="ex-name">Identificar Posición</div><div class="ex-desc">¿Dónde estás respecto al VOR?</div></div>
+      </button>
+      <button class="exercise-btn" data-mode="radial">
+        <div class="ex-icon rad">🧭</div>
+        <div class="ex-info"><div class="ex-name">Identificar Radial</div><div class="ex-desc">¿En qué radial estás?</div></div>
+      </button>
+      <button class="exercise-btn" data-mode="obs">
+        <div class="ex-icon obs">🔧</div>
+        <div class="ex-info"><div class="ex-name">Ajustar OBS</div><div class="ex-desc">Sintoniza el curso correcto</div></div>
+      </button>
+      <button class="exercise-btn" data-mode="passage">
+        <div class="ex-icon pass">🔀</div>
+        <div class="ex-info"><div class="ex-name">Paso por Estación</div><div class="ex-desc">Observa el flip TO/FROM</div></div>
+      </button>
+      <button class="exercise-btn" data-mode="intercept">
+        <div class="ex-icon intc">↗</div>
+        <div class="ex-info"><div class="ex-name">Interceptar Radial</div><div class="ex-desc">Vuela hacia un radial</div></div>
+      </button>
+      <button class="exercise-btn" data-mode="triangulation">
+        <div class="ex-icon tri">📐</div>
+        <div class="ex-info"><div class="ex-name">Triangulación</div><div class="ex-desc">Fija posición con 2 VORs</div></div>
+      </button>
+    </div>
+
+    <div class="section-title">Dificultad</div>
+    <div class="difficulty-selector">
+      <button class="diff-btn active" data-diff="easy">Fácil</button>
+      <button class="diff-btn" data-diff="medium">Medio</button>
+      <button class="diff-btn" data-diff="hard">Difícil</button>
+    </div>
+
+    <div class="section-title">Rendimiento</div>
+    <div class="score-panel">
+      <div class="score-display">
+        <div class="score-item">
+          <div class="score-number correct" id="correctCount">0</div>
+          <div class="score-sublabel">Correctas</div>
+        </div>
+        <div class="score-item">
+          <div class="score-number wrong" id="wrongCount">0</div>
+          <div class="score-sublabel">Errores</div>
+        </div>
+        <div class="score-item">
+          <div class="score-number streak" id="streakCount">0</div>
+          <div class="score-sublabel">Racha</div>
+        </div>
+      </div>
+      <div class="accuracy-bar">
+        <div class="accuracy-fill" id="accuracyBar" style="width: 0%"></div>
+      </div>
+    </div>
+
+    <div class="section-title">Retroalimentación</div>
+    <div class="feedback-area">
+      <h4>Estado</h4>
+      <div class="feedback-text info" id="feedbackText">
+        Selecciona un ejercicio o arrastra el avión en el mapa para comenzar.
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAP -->
+  <div class="map-container">
+    <canvas class="map-canvas" id="mapCanvas"></canvas>
+    <div class="map-overlay-info" id="mapInfo">
+      <div>BRG: <span class="map-label-cyan" id="infoBearing">---°</span></div>
+      <div>DIST: <span class="map-label-amber" id="infoDist">--- nm</span></div>
+      <div>RAD: <span class="map-label-green" id="infoRadial">---°</span></div>
+    </div>
+  </div>
+
+  <!-- INSTRUMENT PANEL -->
+  <div class="instrument-panel" id="instrumentPanel">
+    <!-- Single VOR instrument -->
+    <div id="singleInstrument">
+      <div class="instrument-wrapper">
+        <svg class="vor-instrument" id="vorSVG" viewBox="0 0 340 340"></svg>
+      </div>
+      <div class="obs-controls">
+        <div class="obs-knob-area">
+          <button class="obs-btn fast" id="obsM10">-10</button>
+          <button class="obs-btn" id="obsM1">◀</button>
+        </div>
+        <div class="obs-display">
+          <div class="obs-value" id="obsValue">360</div>
+          <div class="obs-label">OBS</div>
+        </div>
+        <div class="obs-knob-area">
+          <button class="obs-btn" id="obsP1">▶</button>
+          <button class="obs-btn fast" id="obsP10">+10</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Triangulation dual instruments (hidden by default) -->
+    <div id="dualInstrument" class="hidden">
+      <div class="instrument-pair">
+        <div>
+          <div class="station-label">VOR 1</div>
+          <div class="instrument-wrapper">
+            <svg class="vor-instrument" id="vorSVG2a" viewBox="0 0 340 340"></svg>
+          </div>
+          <div class="obs-controls">
+            <button class="obs-btn" id="obs2aM1">◀</button>
+            <div class="obs-display">
+              <div class="obs-value" id="obs2aValue">360</div>
+              <div class="obs-label">OBS</div>
+            </div>
+            <button class="obs-btn" id="obs2aP1">▶</button>
+          </div>
+        </div>
+        <div>
+          <div class="station-label">VOR 2</div>
+          <div class="instrument-wrapper">
+            <svg class="vor-instrument" id="vorSVG2b" viewBox="0 0 340 340"></svg>
+          </div>
+          <div class="obs-controls">
+            <button class="obs-btn" id="obs2bM1">◀</button>
+            <div class="obs-display">
+              <div class="obs-value" id="obs2bValue">360</div>
+              <div class="obs-label">OBS</div>
+            </div>
+            <button class="obs-btn" id="obs2bP1">▶</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Exercise prompt -->
+    <div class="exercise-prompt" id="exercisePrompt">
+      <div class="prompt-title" id="promptTitle">PRÁCTICA LIBRE</div>
+      <div class="prompt-text" id="promptText">Arrastra el avión por el mapa y observa cómo responde el instrumento VOR. Ajusta el OBS para explorar diferentes radiales.</div>
+      <div class="prompt-actions" id="promptActions"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════
+// VOR NAVIGATOR — Core Simulation Engine
+// ═══════════════════════════════════════════
+
+const APP = {
+  // Aircraft state
+  aircraft: { x: 0.65, y: 0.35 }, // normalized 0-1 on map
+  obs: 360,
+  obs2a: 360,
+  obs2b: 360,
+
+  // VOR stations (normalized positions)
+  vor1: { x: 0.5, y: 0.5, name: 'VOR', freq: '112.0' },
+  vor2: { x: 0.75, y: 0.5, name: 'VOR2', freq: '115.4' },
+
+  // State
+  mode: 'free',
+  difficulty: 'easy',
+  dragging: false,
+  animating: false,
+
+  // Score
+  correct: 0,
+  wrong: 0,
+  streak: 0,
+  bestStreak: 0,
+  totalPoints: 0,
+
+  // Current exercise state
+  exercise: null,
+
+  // Passage animation
+  passagePath: null,
+  passageT: 0,
+  passageSpeed: 1,
+  passagePlaying: false,
+
+  // Intercept
+  interceptTarget: null,
+  interceptHeading: 0,
+
+  // Smooth needle
+  currentCDI: 0,
+  targetCDI: 0,
+  currentFlag: 'OFF',
+
+  // Audio
+  audioCtx: null,
+};
+
+// ═══════════ AUDIO ═══════════
+function initAudio() {
+  if (!APP.audioCtx) APP.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+}
+
+function playClick() {
+  initAudio();
+  const ctx = APP.audioCtx;
+  const osc = ctx.createOscillator();
+  const gain = ctx.createGain();
+  osc.connect(gain);
+  gain.connect(ctx.destination);
+  osc.type = 'sine';
+  osc.frequency.value = 1800;
+  gain.gain.setValueAtTime(0.08, ctx.currentTime);
+  gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.05);
+  osc.start(ctx.currentTime);
+  osc.stop(ctx.currentTime + 0.05);
+}
+
+function playSuccess() {
+  initAudio();
+  const ctx = APP.audioCtx;
+  [523, 659, 784].forEach((f, i) => {
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain); gain.connect(ctx.destination);
+    osc.type = 'sine'; osc.frequency.value = f;
+    gain.gain.setValueAtTime(0.06, ctx.currentTime + i * 0.12);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + i * 0.12 + 0.2);
+    osc.start(ctx.currentTime + i * 0.12);
+    osc.stop(ctx.currentTime + i * 0.12 + 0.2);
+  });
+}
+
+function playError() {
+  initAudio();
+  const ctx = APP.audioCtx;
+  const osc = ctx.createOscillator();
+  const gain = ctx.createGain();
+  osc.connect(gain); gain.connect(ctx.destination);
+  osc.type = 'square'; osc.frequency.value = 220;
+  gain.gain.setValueAtTime(0.06, ctx.currentTime);
+  gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.3);
+  osc.start(ctx.currentTime);
+  osc.stop(ctx.currentTime + 0.3);
+}
+
+function playFlagChange() {
+  initAudio();
+  const ctx = APP.audioCtx;
+  const osc = ctx.createOscillator();
+  const gain = ctx.createGain();
+  osc.connect(gain); gain.connect(ctx.destination);
+  osc.type = 'triangle'; osc.frequency.value = 600;
+  gain.gain.setValueAtTime(0.05, ctx.currentTime);
+  gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.15);
+  osc.start(ctx.currentTime);
+  osc.stop(ctx.currentTime + 0.15);
+}
+
+// ═══════════ MATH HELPERS ═══════════
+function normAngle(a) {
+  a = a % 360;
+  if (a < 0) a += 360;
+  return a;
+}
+
+function angleDiff(a, b) {
+  let d = normAngle(a) - normAngle(b);
+  if (d > 180) d -= 360;
+  if (d < -180) d += 360;
+  return d;
+}
+
+function bearingFromTo(fromX, fromY, toX, toY) {
+  const dx = toX - fromX;
+  const dy = -(toY - fromY); // canvas Y is inverted
+  let brg = Math.atan2(dx, dy) * 180 / Math.PI;
+  return normAngle(brg);
+}
+
+function distanceBetween(x1, y1, x2, y2) {
+  return Math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2);
+}
+
+// ═══════════ VOR PHYSICS ═══════════
+function computeVOR(aircraftX, aircraftY, vorX, vorY, obs) {
+  const dist = distanceBetween(aircraftX, aircraftY, vorX, vorY);
+
+  // Bearing FROM station TO aircraft
+  const bearingFromStation = bearingFromTo(vorX, vorY, aircraftX, aircraftY);
+  // This IS the radial the aircraft is on
+  const radial = bearingFromStation;
+
+  // Bearing FROM aircraft TO station
+  const bearingToStation = normAngle(bearingFromStation + 180);
+
+  // CDI deflection
+  // The difference between the selected course (OBS) and the bearing TO the station
+  // determines TO/FROM. CDI shows deviation.
+  const obsNorm = normAngle(obs);
+
+  // Determine TO or FROM
+  const diffToStation = Math.abs(angleDiff(obsNorm, bearingToStation));
+  const flag = diffToStation <= 90 ? 'TO' : 'FROM';
+
+  // CDI: angular difference between selected course and actual radial
+  // Positive = needle deflects right, negative = needle deflects left
+  let cdiAngle = angleDiff(radial, obsNorm);
+  if (flag === 'TO') {
+    cdiAngle = angleDiff(normAngle(obsNorm + 180), radial);
+  } else {
+    cdiAngle = angleDiff(obsNorm, radial);
+  }
+
+  // Clamp to ±10° for full deflection
+  const cdiDeflection = Math.max(-10, Math.min(10, cdiAngle));
+  const cdiNormalized = cdiDeflection / 10; // -1 to 1
+
+  // Cone of confusion near station
+  const inCone = dist < 0.015;
+
+  return {
+    radial: Math.round(radial) || 360,
+    bearingToStation: Math.round(bearingToStation) || 360,
+    flag: inCone ? 'OFF' : flag,
+    cdiNormalized,
+    cdiDegrees: cdiDeflection,
+    distance: dist,
+    inCone
+  };
+}
+
+// ═══════════ SVG INSTRUMENT RENDERING ═══════════
+function createVORInstrument(svgEl) {
+  const ns = 'http://www.w3.org/2000/svg';
+  const cx = 170, cy = 170, r = 155;
+
+  svgEl.innerHTML = '';
+
+  // Definitions
+  const defs = document.createElementNS(ns, 'defs');
+
+  // Bezel gradient
+  const bezelGrad = document.createElementNS(ns, 'radialGradient');
+  bezelGrad.id = svgEl.id + '_bezel';
+  bezelGrad.innerHTML = `
+    <stop offset="0%" stop-color="#3a3d48"/>
+    <stop offset="40%" stop-color="#2a2d35"/>
+    <stop offset="100%" stop-color="#1a1c22"/>
+  `;
+  defs.appendChild(bezelGrad);
+
+  // Face gradient
+  const faceGrad = document.createElementNS(ns, 'radialGradient');
+  faceGrad.id = svgEl.id + '_face';
+  faceGrad.innerHTML = `
+    <stop offset="0%" stop-color="#1a1c22"/>
+    <stop offset="85%" stop-color="#0d0f14"/>
+    <stop offset="100%" stop-color="#080a0e"/>
+  `;
+  defs.appendChild(faceGrad);
+
+  // Glass reflection
+  const glassGrad = document.createElementNS(ns, 'linearGradient');
+  glassGrad.id = svgEl.id + '_glass';
+  glassGrad.setAttribute('x1', '0'); glassGrad.setAttribute('y1', '0');
+  glassGrad.setAttribute('x2', '0.3'); glassGrad.setAttribute('y2', '1');
+  glassGrad.innerHTML = `
+    <stop offset="0%" stop-color="rgba(255,255,255,0.06)"/>
+    <stop offset="50%" stop-color="rgba(255,255,255,0)"/>
+    <stop offset="100%" stop-color="rgba(255,255,255,0.02)"/>
+  `;
+  defs.appendChild(glassGrad);
+
+  svgEl.appendChild(defs);
+
+  // Outer bezel
+  const outerBezel = document.createElementNS(ns, 'circle');
+  outerBezel.setAttribute('cx', cx); outerBezel.setAttribute('cy', cy);
+  outerBezel.setAttribute('r', r + 12);
+  outerBezel.setAttribute('fill', `url(#${svgEl.id}_bezel)`);
+  outerBezel.setAttribute('stroke', '#404450');
+  outerBezel.setAttribute('stroke-width', '1');
+  svgEl.appendChild(outerBezel);
+
+  // Inner bezel ring
+  const innerBezel = document.createElementNS(ns, 'circle');
+  innerBezel.setAttribute('cx', cx); innerBezel.setAttribute('cy', cy);
+  innerBezel.setAttribute('r', r + 4);
+  innerBezel.setAttribute('fill', 'none');
+  innerBezel.setAttribute('stroke', '#505668');
+  innerBezel.setAttribute('stroke-width', '0.5');
+  svgEl.appendChild(innerBezel);
+
+  // Instrument face
+  const face = document.createElementNS(ns, 'circle');
+  face.setAttribute('cx', cx); face.setAttribute('cy', cy);
+  face.setAttribute('r', r);
+  face.setAttribute('fill', `url(#${svgEl.id}_face)`);
+  svgEl.appendChild(face);
+
+  // Compass rose (rotates with OBS)
+  const roseGroup = document.createElementNS(ns, 'g');
+  roseGroup.id = svgEl.id + '_rose';
+  roseGroup.setAttribute('transform', `rotate(0, ${cx}, ${cy})`);
+
+  // Tick marks and numbers
+  for (let deg = 0; deg < 360; deg += 5) {
+    const isMajor = deg % 30 === 0;
+    const isMid = deg % 10 === 0;
+    const radians = (deg - 90) * Math.PI / 180;
+    const innerR = isMajor ? r - 28 : isMid ? r - 18 : r - 12;
+    const outerR = r - 5;
+
+    const tick = document.createElementNS(ns, 'line');
+    tick.setAttribute('x1', cx + innerR * Math.cos(radians));
+    tick.setAttribute('y1', cy + innerR * Math.sin(radians));
+    tick.setAttribute('x2', cx + outerR * Math.cos(radians));
+    tick.setAttribute('y2', cy + outerR * Math.sin(radians));
+    tick.setAttribute('stroke', isMajor ? '#c8ccd4' : isMid ? '#808898' : '#505668');
+    tick.setAttribute('stroke-width', isMajor ? '2' : '1');
+    roseGroup.appendChild(tick);
+
+    if (isMajor) {
+      const textR = r - 38;
+      const label = deg === 0 ? 'N' : deg === 90 ? 'E' : deg === 180 ? 'S' : deg === 270 ? 'W' : (deg / 10).toString();
+      const text = document.createElementNS(ns, 'text');
+      text.setAttribute('x', cx + textR * Math.cos(radians));
+      text.setAttribute('y', cy + textR * Math.sin(radians));
+      text.setAttribute('text-anchor', 'middle');
+      text.setAttribute('dominant-baseline', 'central');
+      text.setAttribute('fill', ['N','E','S','W'].includes(label) ? '#ffb020' : '#a0a8b8');
+      text.setAttribute('font-family', 'Orbitron, sans-serif');
+      text.setAttribute('font-size', ['N','E','S','W'].includes(label) ? '14' : '11');
+      text.setAttribute('font-weight', ['N','E','S','W'].includes(label) ? '700' : '500');
+      // Counter-rotate text so it stays upright relative to current rotation
+      text.setAttribute('transform', `rotate(0, ${cx + textR * Math.cos(radians)}, ${cy + textR * Math.sin(radians)})`);
+      text.textContent = label;
+      text.dataset.deg = deg;
+      roseGroup.appendChild(text);
+    }
+  }
+
+  svgEl.appendChild(roseGroup);
+
+  // Course pointer (triangle at top - fixed position, points selected course)
+  const coursePtr = document.createElementNS(ns, 'polygon');
+  coursePtr.setAttribute('points', `${cx},${cy - r + 6} ${cx - 8},${cy - r + 20} ${cx + 8},${cy - r + 20}`);
+  coursePtr.setAttribute('fill', '#ffb020');
+  coursePtr.setAttribute('opacity', '0.9');
+  roseGroup.appendChild(coursePtr);
+
+  // Course pointer tail
+  const courseTail = document.createElementNS(ns, 'polygon');
+  courseTail.setAttribute('points', `${cx},${cy + r - 6} ${cx - 6},${cy + r - 18} ${cx + 6},${cy + r - 18}`);
+  courseTail.setAttribute('fill', '#ffb020');
+  courseTail.setAttribute('opacity', '0.5');
+  roseGroup.appendChild(courseTail);
+
+  // CDI dots (reference dots along center)
+  for (let i = -4; i <= 4; i++) {
+    if (i === 0) continue;
+    const dot = document.createElementNS(ns, 'circle');
+    dot.setAttribute('cx', cx + i * 15);
+    dot.setAttribute('cy', cy);
+    dot.setAttribute('r', 3);
+    dot.setAttribute('fill', 'none');
+    dot.setAttribute('stroke', '#505668');
+    dot.setAttribute('stroke-width', '1');
+    svgEl.appendChild(dot);
+  }
+
+  // Center dot
+  const centerDot = document.createElementNS(ns, 'circle');
+  centerDot.setAttribute('cx', cx);
+  centerDot.setAttribute('cy', cy);
+  centerDot.setAttribute('r', 4);
+  centerDot.setAttribute('fill', 'none');
+  centerDot.setAttribute('stroke', '#808898');
+  centerDot.setAttribute('stroke-width', '1.5');
+  svgEl.appendChild(centerDot);
+
+  // CDI needle
+  const needle = document.createElementNS(ns, 'line');
+  needle.id = svgEl.id + '_needle';
+  needle.setAttribute('x1', cx);
+  needle.setAttribute('y1', cy - 70);
+  needle.setAttribute('x2', cx);
+  needle.setAttribute('y2', cy + 70);
+  needle.setAttribute('stroke', '#e8e8e8');
+  needle.setAttribute('stroke-width', '2.5');
+  needle.setAttribute('stroke-linecap', 'round');
+  svgEl.appendChild(needle);
+
+  // TO/FROM flag area
+  const flagBg = document.createElementNS(ns, 'rect');
+  flagBg.setAttribute('x', cx + 40); flagBg.setAttribute('y', cy - 16);
+  flagBg.setAttribute('width', 42); flagBg.setAttribute('height', 20);
+  flagBg.setAttribute('rx', 3);
+  flagBg.setAttribute('fill', '#0a0c10');
+  flagBg.setAttribute('stroke', '#303440');
+  flagBg.setAttribute('stroke-width', '1');
+  svgEl.appendChild(flagBg);
+
+  const flagText = document.createElementNS(ns, 'text');
+  flagText.id = svgEl.id + '_flag';
+  flagText.setAttribute('x', cx + 61); flagText.setAttribute('y', cy - 3);
+  flagText.setAttribute('text-anchor', 'middle');
+  flagText.setAttribute('dominant-baseline', 'central');
+  flagText.setAttribute('font-family', 'Orbitron, sans-serif');
+  flagText.setAttribute('font-size', '11');
+  flagText.setAttribute('font-weight', '700');
+  flagText.setAttribute('fill', '#808898');
+  flagText.textContent = 'OFF';
+  svgEl.appendChild(flagText);
+
+  // Glass reflection overlay
+  const glass = document.createElementNS(ns, 'circle');
+  glass.setAttribute('cx', cx); glass.setAttribute('cy', cy);
+  glass.setAttribute('r', r);
+  glass.setAttribute('fill', `url(#${svgEl.id}_glass)`);
+  glass.setAttribute('pointer-events', 'none');
+  svgEl.appendChild(glass);
+
+  // Outer ring shadow
+  const outerShadow = document.createElementNS(ns, 'circle');
+  outerShadow.setAttribute('cx', cx); outerShadow.setAttribute('cy', cy);
+  outerShadow.setAttribute('r', r + 12);
+  outerShadow.setAttribute('fill', 'none');
+  outerShadow.setAttribute('stroke', 'rgba(0,0,0,0.3)');
+  outerShadow.setAttribute('stroke-width', '3');
+  svgEl.appendChild(outerShadow);
+}
+
+function updateVORInstrument(svgEl, obs, cdiNormalized, flag) {
+  const cx = 170, cy = 170;
+
+  // Rotate compass rose (negative because we want selected course at top)
+  const rose = svgEl.querySelector(`#${svgEl.id}_rose`);
+  if (rose) {
+    rose.setAttribute('transform', `rotate(${-obs}, ${cx}, ${cy})`);
+    // Counter-rotate text labels
+    rose.querySelectorAll('text').forEach(t => {
+      const deg = parseInt(t.dataset.deg);
+      if (isNaN(deg)) return;
+      const radians = (deg - 90) * Math.PI / 180;
+      const r = 155 - 38;
+      const tx = cx + r * Math.cos(radians);
+      const ty = cy + r * Math.sin(radians);
+      t.setAttribute('transform', `rotate(${obs}, ${tx}, ${ty})`);
+    });
+  }
+
+  // CDI needle deflection (max ±60px for full deflection mapped to ±4 dots * 15px)
+  const needle = svgEl.querySelector(`#${svgEl.id}_needle`);
+  if (needle) {
+    const deflectPx = cdiNormalized * 60;
+    needle.setAttribute('x1', cx + deflectPx);
+    needle.setAttribute('x2', cx + deflectPx);
+  }
+
+  // Flag
+  const flagEl = svgEl.querySelector(`#${svgEl.id}_flag`);
+  if (flagEl) {
+    flagEl.textContent = flag;
+    if (flag === 'TO') {
+      flagEl.setAttribute('fill', '#00cc66');
+    } else if (flag === 'FROM') {
+      flagEl.setAttribute('fill', '#e84040');
+    } else {
+      flagEl.setAttribute('fill', '#808898');
+    }
+  }
+}
+
+// ═══════════ MAP RENDERING ═══════════
+const canvas = document.getElementById('mapCanvas');
+const ctx = canvas.getContext('2d');
+let mapW, mapH;
+
+function resizeCanvas() {
+  const rect = canvas.parentElement.getBoundingClientRect();
+  canvas.width = rect.width * devicePixelRatio;
+  canvas.height = rect.height * devicePixelRatio;
+  canvas.style.width = rect.width + 'px';
+  canvas.style.height = rect.height + 'px';
+  ctx.setTransform(devicePixelRatio, 0, 0, devicePixelRatio, 0, 0);
+  mapW = rect.width;
+  mapH = rect.height;
+}
+
+function drawMap() {
+  ctx.clearRect(0, 0, mapW, mapH);
+
+  // Background grid
+  ctx.strokeStyle = 'rgba(0, 212, 255, 0.04)';
+  ctx.lineWidth = 0.5;
+  const gridSize = 30;
+  for (let x = 0; x < mapW; x += gridSize) {
+    ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, mapH); ctx.stroke();
+  }
+  for (let y = 0; y < mapH; y += gridSize) {
+    ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(mapW, y); ctx.stroke();
+  }
+
+  const showSecondVOR = APP.mode === 'triangulation';
+
+  // Draw VOR station(s)
+  drawVORStation(APP.vor1, true);
+  if (showSecondVOR) drawVORStation(APP.vor2, false);
+
+  // Draw radial lines from VOR
+  drawRadials(APP.vor1, APP.obs);
+  if (showSecondVOR) drawRadials(APP.vor2, APP.obs2a);
+
+  // Passage path
+  if (APP.mode === 'passage' && APP.passagePath) {
+    drawPassagePath();
+  }
+
+  // Intercept target radial
+  if (APP.mode === 'intercept' && APP.interceptTarget !== null) {
+    drawTargetRadial();
+  }
+
+  // Draw aircraft
+  drawAircraft();
+}
+
+function drawVORStation(vor, isPrimary) {
+  const sx = vor.x * mapW;
+  const sy = vor.y * mapH;
+
+  // Station symbol — hexagonal
+  ctx.save();
+  ctx.translate(sx, sy);
+
+  // Outer glow
+  const glowGrad = ctx.createRadialGradient(0, 0, 0, 0, 0, 40);
+  glowGrad.addColorStop(0, isPrimary ? 'rgba(0, 212, 255, 0.15)' : 'rgba(255, 176, 32, 0.15)');
+  glowGrad.addColorStop(1, 'rgba(0,0,0,0)');
+  ctx.fillStyle = glowGrad;
+  ctx.fillRect(-40, -40, 80, 80);
+
+  // Hexagon
+  ctx.beginPath();
+  for (let i = 0; i < 6; i++) {
+    const angle = (i * 60 - 30) * Math.PI / 180;
+    const px = 12 * Math.cos(angle);
+    const py = 12 * Math.sin(angle);
+    i === 0 ? ctx.moveTo(px, py) : ctx.lineTo(px, py);
+  }
+  ctx.closePath();
+  ctx.fillStyle = isPrimary ? 'rgba(0, 212, 255, 0.2)' : 'rgba(255, 176, 32, 0.2)';
+  ctx.fill();
+  ctx.strokeStyle = isPrimary ? '#00d4ff' : '#ffb020';
+  ctx.lineWidth = 1.5;
+  ctx.stroke();
+
+  // Center dot
+  ctx.beginPath();
+  ctx.arc(0, 0, 3, 0, Math.PI * 2);
+  ctx.fillStyle = isPrimary ? '#00d4ff' : '#ffb020';
+  ctx.fill();
+
+  // Label
+  ctx.font = '600 10px "Orbitron", sans-serif';
+  ctx.fillStyle = isPrimary ? '#00d4ff' : '#ffb020';
+  ctx.textAlign = 'center';
+  ctx.fillText(vor.name, 0, -20);
+  ctx.font = '10px "Share Tech Mono", monospace';
+  ctx.fillStyle = 'rgba(255,255,255,0.4)';
+  ctx.fillText(vor.freq, 0, -32);
+
+  ctx.restore();
+}
+
+function drawRadials(vor, selectedObs) {
+  const sx = vor.x * mapW;
+  const sy = vor.y * mapH;
+
+  // Draw all 36 radials (every 10°) faintly
+  for (let deg = 0; deg < 360; deg += 10) {
+    const rad = (deg - 90) * Math.PI / 180;
+    const len = Math.max(mapW, mapH);
+
+    ctx.beginPath();
+    ctx.moveTo(sx, sy);
+    ctx.lineTo(sx + len * Math.cos(rad), sy + len * Math.sin(rad));
+    ctx.strokeStyle = deg % 30 === 0 ? 'rgba(0, 212, 255, 0.08)' : 'rgba(0, 212, 255, 0.03)';
+    ctx.lineWidth = 0.5;
+    ctx.stroke();
+
+    // Labels for every 30°
+    if (deg % 30 === 0) {
+      const labelDist = 50;
+      const lx = sx + labelDist * Math.cos(rad);
+      const ly = sy + labelDist * Math.sin(rad);
+      ctx.font = '9px "Share Tech Mono", monospace';
+      ctx.fillStyle = 'rgba(0, 212, 255, 0.25)';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(deg === 0 ? '360' : deg.toString().padStart(3, '0'), lx, ly);
+    }
+  }
+
+  // Highlight selected OBS radial
+  const obsRad = (selectedObs - 90) * Math.PI / 180;
+  const recipRad = (selectedObs + 180 - 90) * Math.PI / 180;
+  const len = Math.max(mapW, mapH);
+
+  ctx.setLineDash([6, 4]);
+  ctx.beginPath();
+  ctx.moveTo(sx + len * Math.cos(recipRad), sy + len * Math.sin(recipRad));
+  ctx.lineTo(sx + len * Math.cos(obsRad), sy + len * Math.sin(obsRad));
+  ctx.strokeStyle = 'rgba(0, 230, 118, 0.35)';
+  ctx.lineWidth = 1.5;
+  ctx.stroke();
+  ctx.setLineDash([]);
+}
+
+function drawAircraft() {
+  const ax = APP.aircraft.x * mapW;
+  const ay = APP.aircraft.y * mapH;
+
+  ctx.save();
+  ctx.translate(ax, ay);
+
+  // Aircraft heading indicator (for intercept mode)
+  if (APP.mode === 'intercept' && APP.interceptHeading !== undefined) {
+    const hdgRad = (APP.interceptHeading - 90) * Math.PI / 180;
+    ctx.beginPath();
+    ctx.moveTo(0, 0);
+    ctx.lineTo(30 * Math.cos(hdgRad), 30 * Math.sin(hdgRad));
+    ctx.strokeStyle = 'rgba(255, 176, 32, 0.5)';
+    ctx.lineWidth = 1.5;
+    ctx.setLineDash([3, 3]);
+    ctx.stroke();
+    ctx.setLineDash([]);
+  }
+
+  // Glow
+  const glow = ctx.createRadialGradient(0, 0, 0, 0, 0, 20);
+  glow.addColorStop(0, 'rgba(255, 176, 32, 0.2)');
+  glow.addColorStop(1, 'rgba(0,0,0,0)');
+  ctx.fillStyle = glow;
+  ctx.fillRect(-20, -20, 40, 40);
+
+  // Aircraft icon (simple triangle)
+  ctx.beginPath();
+  ctx.moveTo(0, -10);
+  ctx.lineTo(-7, 8);
+  ctx.lineTo(0, 5);
+  ctx.lineTo(7, 8);
+  ctx.closePath();
+  ctx.fillStyle = '#ffb020';
+  ctx.fill();
+  ctx.strokeStyle = '#ffc040';
+  ctx.lineWidth = 0.5;
+  ctx.stroke();
+
+  // Wings
+  ctx.beginPath();
+  ctx.moveTo(-14, 1);
+  ctx.lineTo(14, 1);
+  ctx.strokeStyle = '#ffb020';
+  ctx.lineWidth = 2;
+  ctx.stroke();
+
+  ctx.restore();
+}
+
+function drawPassagePath() {
+  const path = APP.passagePath;
+  const sx = path.start.x * mapW;
+  const sy = path.start.y * mapH;
+  const ex = path.end.x * mapW;
+  const ey = path.end.y * mapH;
+
+  // Path line
+  ctx.beginPath();
+  ctx.moveTo(sx, sy);
+  ctx.lineTo(ex, ey);
+  ctx.strokeStyle = 'rgba(255, 176, 32, 0.2)';
+  ctx.lineWidth = 1;
+  ctx.setLineDash([4, 4]);
+  ctx.stroke();
+  ctx.setLineDash([]);
+
+  // Start marker
+  ctx.beginPath();
+  ctx.arc(sx, sy, 4, 0, Math.PI * 2);
+  ctx.fillStyle = 'rgba(0, 230, 118, 0.5)';
+  ctx.fill();
+
+  // End marker
+  ctx.beginPath();
+  ctx.arc(ex, ey, 4, 0, Math.PI * 2);
+  ctx.fillStyle = 'rgba(232, 64, 64, 0.5)';
+  ctx.fill();
+}
+
+function drawTargetRadial() {
+  const sx = APP.vor1.x * mapW;
+  const sy = APP.vor1.y * mapH;
+  const rad = (APP.interceptTarget - 90) * Math.PI / 180;
+  const len = Math.max(mapW, mapH);
+
+  ctx.beginPath();
+  ctx.moveTo(sx, sy);
+  ctx.lineTo(sx + len * Math.cos(rad), sy + len * Math.sin(rad));
+  ctx.strokeStyle = 'rgba(255, 100, 150, 0.4)';
+  ctx.lineWidth = 2;
+  ctx.setLineDash([8, 4]);
+  ctx.stroke();
+  ctx.setLineDash([]);
+
+  // Label
+  const lx = sx + 80 * Math.cos(rad);
+  const ly = sy + 80 * Math.sin(rad);
+  ctx.font = 'bold 11px "Orbitron", sans-serif';
+  ctx.fillStyle = 'rgba(255, 100, 150, 0.7)';
+  ctx.textAlign = 'center';
+  ctx.fillText('R-' + APP.interceptTarget.toString().padStart(3, '0'), lx, ly);
+}
+
+// ═══════════ MAP INTERACTION ═══════════
+function getMapPos(e) {
+  const rect = canvas.getBoundingClientRect();
+  const x = (e.clientX - rect.left) / rect.width;
+  const y = (e.clientY - rect.top) / rect.height;
+  return { x: Math.max(0.02, Math.min(0.98, x)), y: Math.max(0.02, Math.min(0.98, y)) };
+}
+
+canvas.addEventListener('mousedown', (e) => {
+  if (APP.mode === 'passage' && APP.passagePlaying) return;
+  const pos = getMapPos(e);
+  const dist = distanceBetween(pos.x, pos.y, APP.aircraft.x, APP.aircraft.y);
+  if (dist < 0.05 || APP.mode === 'free') {
+    APP.dragging = true;
+    APP.aircraft.x = pos.x;
+    APP.aircraft.y = pos.y;
+    update();
+  }
+});
+
+canvas.addEventListener('mousemove', (e) => {
+  if (!APP.dragging) return;
+  const pos = getMapPos(e);
+  APP.aircraft.x = pos.x;
+  APP.aircraft.y = pos.y;
+  update();
+});
+
+canvas.addEventListener('mouseup', () => { APP.dragging = false; });
+canvas.addEventListener('mouseleave', () => { APP.dragging = false; });
+
+// Touch support
+canvas.addEventListener('touchstart', (e) => {
+  e.preventDefault();
+  if (APP.mode === 'passage' && APP.passagePlaying) return;
+  const touch = e.touches[0];
+  const pos = getMapPos(touch);
+  APP.dragging = true;
+  APP.aircraft.x = pos.x;
+  APP.aircraft.y = pos.y;
+  update();
+}, { passive: false });
+
+canvas.addEventListener('touchmove', (e) => {
+  e.preventDefault();
+  if (!APP.dragging) return;
+  const touch = e.touches[0];
+  const pos = getMapPos(touch);
+  APP.aircraft.x = pos.x;
+  APP.aircraft.y = pos.y;
+  update();
+}, { passive: false });
+
+canvas.addEventListener('touchend', () => { APP.dragging = false; });
+
+// ═══════════ OBS CONTROLS ═══════════
+function setOBS(val) {
+  APP.obs = normAngle(val) || 360;
+  document.getElementById('obsValue').textContent = APP.obs.toString().padStart(3, '0');
+  playClick();
+  update();
+}
+
+document.getElementById('obsP1').addEventListener('click', () => setOBS(APP.obs + 1));
+document.getElementById('obsM1').addEventListener('click', () => setOBS(APP.obs - 1));
+document.getElementById('obsP10').addEventListener('click', () => setOBS(APP.obs + 10));
+document.getElementById('obsM10').addEventListener('click', () => setOBS(APP.obs - 10));
+
+// Dual OBS
+function setOBS2a(val) {
+  APP.obs2a = normAngle(val) || 360;
+  document.getElementById('obs2aValue').textContent = APP.obs2a.toString().padStart(3, '0');
+  playClick();
+  update();
+}
+function setOBS2b(val) {
+  APP.obs2b = normAngle(val) || 360;
+  document.getElementById('obs2bValue').textContent = APP.obs2b.toString().padStart(3, '0');
+  playClick();
+  update();
+}
+
+document.getElementById('obs2aP1').addEventListener('click', () => setOBS2a(APP.obs2a + 1));
+document.getElementById('obs2aM1').addEventListener('click', () => setOBS2a(APP.obs2a - 1));
+document.getElementById('obs2bP1').addEventListener('click', () => setOBS2b(APP.obs2b + 1));
+document.getElementById('obs2bM1').addEventListener('click', () => setOBS2b(APP.obs2b - 1));
+
+// ═══════════ CORE UPDATE LOOP ═══════════
+let prevFlag = 'OFF';
+
+function update() {
+  // Compute VOR state
+  const vor = computeVOR(APP.aircraft.x, APP.aircraft.y, APP.vor1.x, APP.vor1.y, APP.obs);
+
+  // Detect flag change
+  if (vor.flag !== prevFlag && prevFlag !== 'OFF' && vor.flag !== 'OFF') {
+    playFlagChange();
+  }
+  prevFlag = vor.flag;
+
+  // Update instrument
+  updateVORInstrument(document.getElementById('vorSVG'), APP.obs, vor.cdiNormalized, vor.flag);
+
+  // Triangulation: second VOR
+  if (APP.mode === 'triangulation') {
+    const vor2data = computeVOR(APP.aircraft.x, APP.aircraft.y, APP.vor2.x, APP.vor2.y, APP.obs2a);
+    updateVORInstrument(document.getElementById('vorSVG2a'), APP.obs2a, vor2data.cdiNormalized, vor2data.flag);
+    const vor2bdata = computeVOR(APP.aircraft.x, APP.aircraft.y, APP.vor2.x, APP.vor2.y, APP.obs2b);
+    // Actually use VOR1 for first instrument, VOR2 for second
+    const v1 = computeVOR(APP.aircraft.x, APP.aircraft.y, APP.vor1.x, APP.vor1.y, APP.obs2a);
+    const v2 = computeVOR(APP.aircraft.x, APP.aircraft.y, APP.vor2.x, APP.vor2.y, APP.obs2b);
+    updateVORInstrument(document.getElementById('vorSVG2a'), APP.obs2a, v1.cdiNormalized, v1.flag);
+    updateVORInstrument(document.getElementById('vorSVG2b'), APP.obs2b, v2.cdiNormalized, v2.flag);
+  }
+
+  // Update info overlay
+  document.getElementById('infoBearing').textContent = vor.bearingToStation.toString().padStart(3, '0') + '°';
+  document.getElementById('infoDist').textContent = (vor.distance * 100).toFixed(1) + ' nm';
+  document.getElementById('infoRadial').textContent = 'R-' + vor.radial.toString().padStart(3, '0');
+
+  // Redraw map
+  drawMap();
+}
+
+// ═══════════ EXERCISE SYSTEM ═══════════
+
+function setMode(mode) {
+  APP.mode = mode;
+  APP.passagePlaying = false;
+  APP.exercise = null;
+
+  // Toggle instrument visibility
+  document.getElementById('singleInstrument').classList.toggle('hidden', mode === 'triangulation');
+  document.getElementById('dualInstrument').classList.toggle('hidden', mode !== 'triangulation');
+
+  // Update sidebar
+  document.querySelectorAll('.exercise-btn').forEach(b => {
+    b.classList.toggle('active', b.dataset.mode === mode);
+  });
+
+  switch (mode) {
+    case 'free': startFreeMode(); break;
+    case 'position': generatePositionExercise(); break;
+    case 'radial': generateRadialExercise(); break;
+    case 'obs': generateOBSExercise(); break;
+    case 'passage': startPassageMode(); break;
+    case 'intercept': generateInterceptExercise(); break;
+    case 'triangulation': startTriangulationMode(); break;
+  }
+
+  update();
+}
+
+// — FREE MODE —
+function startFreeMode() {
+  document.getElementById('promptTitle').textContent = 'PRÁCTICA LIBRE';
+  document.getElementById('promptText').textContent = 'Arrastra el avión por el mapa y observa cómo responde el instrumento VOR. Gira el OBS para explorar diferentes radiales. El CDI indica tu desviación respecto al radial seleccionado.';
+  document.getElementById('promptActions').innerHTML = '';
+  setFeedback('Modo libre activo. Experimenta libremente.', 'info');
+}
+
+// — POSITION IDENTIFICATION —
+function generatePositionExercise() {
+  // Place aircraft randomly
+  const angle = Math.random() * 360;
+  const dist = 0.15 + Math.random() * 0.25;
+  const rad = angle * Math.PI / 180;
+  APP.aircraft.x = APP.vor1.x + dist * Math.sin(rad);
+  APP.aircraft.y = APP.vor1.y - dist * Math.cos(rad);
+  APP.aircraft.x = Math.max(0.05, Math.min(0.95, APP.aircraft.x));
+  APP.aircraft.y = Math.max(0.05, Math.min(0.95, APP.aircraft.y));
+
+  // Set OBS to something
+  const obsOptions = APP.difficulty === 'easy' ?
+    [0, 30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330] :
+    APP.difficulty === 'medium' ?
+    Array.from({length: 36}, (_, i) => i * 10) :
+    Array.from({length: 72}, (_, i) => i * 5);
+
+  APP.obs = obsOptions[Math.floor(Math.random() * obsOptions.length)] || 360;
+  document.getElementById('obsValue').textContent = APP.obs.toString().padStart(3, '0');
+
+  const vor = computeVOR(APP.aircraft.x, APP.aircraft.y, APP.vor1.x, APP.vor1.y, APP.obs);
+
+  // Generate multiple choice answers
+  const correctRadial = vor.radial;
+  const positions = generatePositionChoices(correctRadial);
+
+  APP.exercise = {
+    type: 'position',
+    correctAnswer: correctRadial,
+    answered: false
+  };
+
+  document.getElementById('promptTitle').textContent = 'IDENTIFICAR POSICIÓN';
+  document.getElementById('promptText').textContent = `Observa el instrumento VOR. Con OBS en ${APP.obs.toString().padStart(3,'0')}°, la bandera muestra ${vor.flag} y el CDI está ${describeCDI(vor.cdiNormalized)}. ¿En qué cuadrante o radial te encuentras?`;
+
+  const actionsDiv = document.getElementById('promptActions');
+  actionsDiv.innerHTML = '';
+  positions.forEach(pos => {
+    const btn = document.createElement('button');
+    btn.className = 'answer-btn';
+    btn.textContent = pos.label;
+    btn.dataset.value = pos.value;
+    btn.addEventListener('click', () => handlePositionAnswer(pos.value, correctRadial, btn));
+    actionsDiv.appendChild(btn);
+  });
+}
+
+function generatePositionChoices(correctRadial) {
+  const quadrants = [
+    { label: 'NE (001-090)', min: 1, max: 90 },
+    { label: 'SE (091-180)', min: 91, max: 180 },
+    { label: 'SO (181-270)', min: 181, max: 270 },
+    { label: 'NO (271-360)', min: 271, max: 360 }
+  ];
+
+  if (APP.difficulty === 'easy') {
+    return quadrants.map(q => ({
+      label: q.label,
+      value: q.min <= correctRadial && correctRadial <= q.max ? correctRadial : q.min
+    }));
+  }
+
+  // Medium/Hard: specific radials
+  const choices = [{ label: `R-${correctRadial.toString().padStart(3,'0')}`, value: correctRadial }];
+  const offsets = APP.difficulty === 'medium' ? [30, -30, 180] : [10, -10, 5];
+  offsets.forEach(o => {
+    const r = normAngle(correctRadial + o) || 360;
+    choices.push({ label: `R-${r.toString().padStart(3,'0')}`, value: r });
+  });
+  // Shuffle
+  return choices.sort(() => Math.random() - 0.5);
+}
+
+function handlePositionAnswer(selected, correct, btnEl) {
+  if (APP.exercise.answered) return;
+  APP.exercise.answered = true;
+
+  const isCorrectQuadrant = APP.difficulty === 'easy';
+  let isCorrect;
+
+  if (isCorrectQuadrant) {
+    const getQuad = r => r <= 90 ? 'NE' : r <= 180 ? 'SE' : r <= 270 ? 'SO' : 'NO';
+    isCorrect = getQuad(selected) === getQuad(correct) || selected === correct;
+  } else {
+    isCorrect = Math.abs(angleDiff(selected, correct)) <= 5;
+  }
+
+  document.querySelectorAll('.answer-btn').forEach(b => {
+    const val = parseInt(b.dataset.value);
+    if (isCorrectQuadrant) {
+      const getQuad = r => r <= 90 ? 'NE' : r <= 180 ? 'SE' : r <= 270 ? 'SO' : 'NO';
+      if (getQuad(val) === getQuad(correct) || val === correct) b.classList.add('correct');
+    } else {
+      if (Math.abs(angleDiff(val, correct)) <= 5) b.classList.add('correct');
+    }
+  });
+
+  if (!isCorrect) btnEl.classList.add('incorrect');
+
+  recordAnswer(isCorrect);
+
+  const explanation = `El radial correcto es R-${correct.toString().padStart(3,'0')}. Recuerda: los radiales emanan DESDE la estación. Si la bandera dice TO, vuelas hacia la estación; si dice FROM, te alejas.`;
+  showExplanation(isCorrect, explanation);
+
+  // Add next button
+  addNextButton(() => generatePositionExercise());
+}
+
+// — RADIAL IDENTIFICATION —
+function generateRadialExercise() {
+  // Place aircraft randomly
+  const angle = Math.random() * 360;
+  const dist = 0.15 + Math.random() * 0.25;
+  const rad = angle * Math.PI / 180;
+  APP.aircraft.x = APP.vor1.x + dist * Math.sin(rad);
+  APP.aircraft.y = APP.vor1.y - dist * Math.cos(rad);
+  APP.aircraft.x = Math.max(0.05, Math.min(0.95, APP.aircraft.x));
+  APP.aircraft.y = Math.max(0.05, Math.min(0.95, APP.aircraft.y));
+
+  const vor = computeVOR(APP.aircraft.x, APP.aircraft.y, APP.vor1.x, APP.vor1.y, APP.obs);
+  const correctRadial = vor.radial;
+
+  // Generate choices
+  const choices = [correctRadial];
+  const offsets = APP.difficulty === 'easy' ? [90, 180, 270] :
+                  APP.difficulty === 'medium' ? [30, -30, 180] : [10, -10, 20];
+  offsets.forEach(o => {
+    let r = normAngle(correctRadial + o);
+    if (r === 0) r = 360;
+    choices.push(r);
+  });
+
+  const shuffled = choices.sort(() => Math.random() - 0.5);
+
+  APP.exercise = { type: 'radial', correctAnswer: correctRadial, answered: false };
+
+  document.getElementById('promptTitle').textContent = 'IDENTIFICAR RADIAL';
+  document.getElementById('promptText').textContent = 'Observando la posición del avión en el mapa, ¿en qué radial del VOR te encuentras? Pista: el radial es el rumbo magnético DESDE la estación hacia ti.';
+
+  const actionsDiv = document.getElementById('promptActions');
+  actionsDiv.innerHTML = '';
+  shuffled.forEach(r => {
+    const btn = document.createElement('button');
+    btn.className = 'answer-btn';
+    btn.textContent = `R-${r.toString().padStart(3, '0')}`;
+    btn.dataset.value = r;
+    btn.addEventListener('click', () => handleRadialAnswer(r, correctRadial, btn));
+    actionsDiv.appendChild(btn);
+  });
+}
+
+function handleRadialAnswer(selected, correct, btnEl) {
+  if (APP.exercise.answered) return;
+  APP.exercise.answered = true;
+
+  const isCorrect = Math.abs(angleDiff(selected, correct)) <= 5;
+
+  document.querySelectorAll('.answer-btn').forEach(b => {
+    if (Math.abs(angleDiff(parseInt(b.dataset.value), correct)) <= 5) b.classList.add('correct');
+  });
+  if (!isCorrect) btnEl.classList.add('incorrect');
+
+  recordAnswer(isCorrect);
+
+  const explanation = `El radial correcto es R-${correct.toString().padStart(3,'0')}. Para determinarlo: imagina una línea desde el VOR hasta el avión — el ángulo de esa línea respecto al norte magnético es el radial.`;
+  showExplanation(isCorrect, explanation);
+  addNextButton(() => generateRadialExercise());
+}
+
+// — OBS SETTING —
+function generateOBSExercise() {
+  // Random target radial
+  const precision = APP.difficulty === 'easy' ? 30 : APP.difficulty === 'medium' ? 10 : 5;
+  const targetRadial = (Math.floor(Math.random() * (360 / precision)) * precision) || 360;
+
+  // Random direction: inbound or outbound
+  const inbound = Math.random() > 0.5;
+
+  // Place aircraft on a different radial
+  const offsetAngle = normAngle(targetRadial + 40 + Math.random() * 100);
+  const dist = 0.2 + Math.random() * 0.15;
+  const rad = offsetAngle * Math.PI / 180;
+  APP.aircraft.x = APP.vor1.x + dist * Math.sin(rad);
+  APP.aircraft.y = APP.vor1.y - dist * Math.cos(rad);
+  APP.aircraft.x = Math.max(0.05, Math.min(0.95, APP.aircraft.x));
+  APP.aircraft.y = Math.max(0.05, Math.min(0.95, APP.aircraft.y));
+
+  // Expected OBS value
+  const expectedOBS = inbound ? normAngle(targetRadial + 180) || 360 : targetRadial;
+
+  APP.exercise = {
+    type: 'obs',
+    targetRadial,
+    inbound,
+    expectedOBS,
+    answered: false,
+    startTime: Date.now()
+  };
+
+  document.getElementById('promptTitle').textContent = 'AJUSTAR OBS';
+  const direction = inbound ? 'INBOUND (hacia la estación)' : 'OUTBOUND (desde la estación)';
+  document.getElementById('promptText').textContent = `Ajusta el OBS para navegar ${direction} por el radial ${targetRadial.toString().padStart(3,'0')}. Luego presiona "Verificar".`;
+
+  const actionsDiv = document.getElementById('promptActions');
+  actionsDiv.innerHTML = '';
+
+  const checkBtn = document.createElement('button');
+  checkBtn.className = 'submit-btn';
+  checkBtn.textContent = 'VERIFICAR';
+  checkBtn.addEventListener('click', () => handleOBSAnswer());
+  actionsDiv.appendChild(checkBtn);
+
+  APP.interceptTarget = targetRadial;
+}
+
+function handleOBSAnswer() {
+  if (APP.exercise.answered) return;
+  APP.exercise.answered = true;
+
+  const expected = APP.exercise.expectedOBS;
+  const tolerance = APP.difficulty === 'easy' ? 5 : APP.difficulty === 'medium' ? 3 : 1;
+  const diff = Math.abs(angleDiff(APP.obs, expected));
+  const isCorrect = diff <= tolerance;
+
+  const elapsed = ((Date.now() - APP.exercise.startTime) / 1000).toFixed(1);
+
+  recordAnswer(isCorrect);
+
+  const directionWord = APP.exercise.inbound ? 'inbound' : 'outbound';
+  const explanation = isCorrect ?
+    `¡Correcto! OBS en ${APP.obs}° para navegar ${directionWord} por R-${APP.exercise.targetRadial.toString().padStart(3,'0')}. Tiempo: ${elapsed}s.` :
+    `El OBS correcto es ${expected}°. Para navegar ${directionWord} por el radial ${APP.exercise.targetRadial.toString().padStart(3,'0')}: ${APP.exercise.inbound ? 'selecciona el curso recíproco (radial + 180°) para obtener bandera TO' : 'selecciona el radial directamente para obtener bandera FROM'}.`;
+
+  showExplanation(isCorrect, explanation);
+  addNextButton(() => generateOBSExercise());
+}
+
+// — STATION PASSAGE —
+function startPassageMode() {
+  // Create a path that crosses over the VOR
+  const approachAngle = Math.random() * 360;
+  const approachRad = approachAngle * Math.PI / 180;
+  const dist = 0.35;
+
+  const start = {
+    x: Math.max(0.05, Math.min(0.95, APP.vor1.x - dist * Math.sin(approachRad))),
+    y: Math.max(0.05, Math.min(0.95, APP.vor1.y + dist * Math.cos(approachRad)))
+  };
+  const end = {
+    x: Math.max(0.05, Math.min(0.95, APP.vor1.x + dist * Math.sin(approachRad))),
+    y: Math.max(0.05, Math.min(0.95, APP.vor1.y - dist * Math.cos(approachRad)))
+  };
+
+  APP.passagePath = { start, end };
+  APP.passageT = 0;
+  APP.aircraft.x = start.x;
+  APP.aircraft.y = start.y;
+
+  // Set OBS to approach course
+  const courseToStation = Math.round(bearingFromTo(start.x, start.y, APP.vor1.x, APP.vor1.y));
+  APP.obs = courseToStation || 360;
+  document.getElementById('obsValue').textContent = APP.obs.toString().padStart(3, '0');
+
+  document.getElementById('promptTitle').textContent = 'PASO POR ESTACIÓN';
+  document.getElementById('promptText').textContent = `El avión volará directo sobre la estación VOR. Observa cómo la bandera cambia de TO a FROM al pasar por encima, y cómo el CDI se vuelve inestable en el "cono de confusión".`;
+
+  const actionsDiv = document.getElementById('promptActions');
+  actionsDiv.innerHTML = `
+    <div class="passage-controls">
+      <button class="play-btn" id="passagePlay">▶ Iniciar Vuelo</button>
+      <button class="play-btn" id="passageReset" style="border-color: var(--accent-amber); color: var(--accent-amber);">↺ Reiniciar</button>
+      <select class="speed-select" id="passageSpeedSel">
+        <option value="0.5">0.5x</option>
+        <option value="1" selected>1x</option>
+        <option value="2">2x</option>
+      </select>
+    </div>
+  `;
+
+  document.getElementById('passagePlay').addEventListener('click', () => {
+    APP.passagePlaying = !APP.passagePlaying;
+    document.getElementById('passagePlay').textContent = APP.passagePlaying ? '⏸ Pausar' : '▶ Continuar';
+  });
+
+  document.getElementById('passageReset').addEventListener('click', () => {
+    APP.passageT = 0;
+    APP.passagePlaying = false;
+    APP.aircraft.x = APP.passagePath.start.x;
+    APP.aircraft.y = APP.passagePath.start.y;
+    document.getElementById('passagePlay').textContent = '▶ Iniciar Vuelo';
+    update();
+  });
+
+  document.getElementById('passageSpeedSel').addEventListener('change', (e) => {
+    APP.passageSpeed = parseFloat(e.target.value);
+  });
+
+  update();
+}
+
+// Passage animation loop
+function passageAnimLoop() {
+  if (APP.passagePlaying && APP.passagePath) {
+    APP.passageT += 0.002 * APP.passageSpeed;
+    if (APP.passageT >= 1) {
+      APP.passageT = 1;
+      APP.passagePlaying = false;
+      document.getElementById('passagePlay').textContent = '▶ Completado';
+      setFeedback('Vuelo completado. ¿Observaste el cambio TO→FROM al pasar por la estación? El cono de confusión causa inestabilidad momentánea en el instrumento.', 'success');
+    }
+
+    const path = APP.passagePath;
+    APP.aircraft.x = path.start.x + (path.end.x - path.start.x) * APP.passageT;
+    APP.aircraft.y = path.start.y + (path.end.y - path.start.y) * APP.passageT;
+    update();
+  }
+  requestAnimationFrame(passageAnimLoop);
+}
+
+// — INTERCEPT EXERCISE —
+function generateInterceptExercise() {
+  // Target radial to intercept
+  const precision = APP.difficulty === 'easy' ? 30 : APP.difficulty === 'medium' ? 10 : 5;
+  const targetRadial = (Math.floor(Math.random() * (360 / precision)) * precision) || 360;
+
+  // Place aircraft offset from this radial
+  const offsetDeg = (APP.difficulty === 'easy' ? 45 : APP.difficulty === 'medium' ? 30 : 15) * (Math.random() > 0.5 ? 1 : -1);
+  const acRadial = normAngle(targetRadial + offsetDeg);
+  const dist = 0.2 + Math.random() * 0.15;
+  const rad = acRadial * Math.PI / 180;
+
+  APP.aircraft.x = APP.vor1.x + dist * Math.sin(rad);
+  APP.aircraft.y = APP.vor1.y - dist * Math.cos(rad);
+  APP.aircraft.x = Math.max(0.05, Math.min(0.95, APP.aircraft.x));
+  APP.aircraft.y = Math.max(0.05, Math.min(0.95, APP.aircraft.y));
+
+  APP.interceptTarget = targetRadial;
+
+  const inbound = Math.random() > 0.5;
+  const expectedOBS = inbound ? normAngle(targetRadial + 180) || 360 : targetRadial;
+
+  APP.exercise = {
+    type: 'intercept',
+    targetRadial,
+    inbound,
+    expectedOBS,
+    answered: false
+  };
+
+  document.getElementById('promptTitle').textContent = 'INTERCEPTAR RADIAL';
+  const direction = inbound ? 'inbound' : 'outbound';
+  document.getElementById('promptText').textContent = `Intercepta y rastrea el radial R-${targetRadial.toString().padStart(3,'0')} ${direction}. Ajusta el OBS correctamente y arrastra el avión hasta que el CDI esté centrado. Presiona "Verificar" cuando estés listo.`;
+
+  const actionsDiv = document.getElementById('promptActions');
+  actionsDiv.innerHTML = '';
+
+  const checkBtn = document.createElement('button');
+  checkBtn.className = 'submit-btn';
+  checkBtn.textContent = 'VERIFICAR INTERCEPCIÓN';
+  checkBtn.addEventListener('click', () => handleInterceptAnswer());
+  actionsDiv.appendChild(checkBtn);
+
+  update();
+}
+
+function handleInterceptAnswer() {
+  if (APP.exercise.answered) return;
+  APP.exercise.answered = true;
+
+  const vor = computeVOR(APP.aircraft.x, APP.aircraft.y, APP.vor1.x, APP.vor1.y, APP.obs);
+  const obsDiff = Math.abs(angleDiff(APP.obs, APP.exercise.expectedOBS));
+  const cdiCentered = Math.abs(vor.cdiNormalized) < 0.2;
+  const obsCorrect = obsDiff <= 5;
+  const flagCorrect = APP.exercise.inbound ? vor.flag === 'TO' : vor.flag === 'FROM';
+
+  const isCorrect = obsCorrect && cdiCentered && flagCorrect;
+
+  recordAnswer(isCorrect);
+
+  let explanation = '';
+  if (!obsCorrect) {
+    explanation += `OBS incorrecto (${APP.obs}° vs esperado ${APP.exercise.expectedOBS}°). `;
+  }
+  if (!cdiCentered) {
+    explanation += `CDI no centrado — necesitas estar sobre el radial. `;
+  }
+  if (!flagCorrect) {
+    explanation += `Bandera incorrecta (${vor.flag} vs esperado ${APP.exercise.inbound ? 'TO' : 'FROM'}). `;
+  }
+  if (isCorrect) {
+    explanation = `¡Excelente! Interceptaste correctamente el radial R-${APP.exercise.targetRadial.toString().padStart(3,'0')} con OBS ${APP.obs}° y CDI centrado.`;
+  }
+
+  showExplanation(isCorrect, explanation);
+  addNextButton(() => generateInterceptExercise());
+}
+
+// — TRIANGULATION —
+function startTriangulationMode() {
+  // Place VOR2 at different position
+  APP.vor2.x = 0.25;
+  APP.vor2.y = 0.45;
+
+  // Random aircraft position
+  APP.aircraft.x = 0.4 + Math.random() * 0.3;
+  APP.aircraft.y = 0.2 + Math.random() * 0.4;
+
+  // Reset dual OBS
+  APP.obs2a = 360;
+  APP.obs2b = 360;
+  document.getElementById('obs2aValue').textContent = '360';
+  document.getElementById('obs2bValue').textContent = '360';
+
+  // Compute correct radials
+  const v1 = computeVOR(APP.aircraft.x, APP.aircraft.y, APP.vor1.x, APP.vor1.y, APP.obs2a);
+  const v2 = computeVOR(APP.aircraft.x, APP.aircraft.y, APP.vor2.x, APP.vor2.y, APP.obs2b);
+
+  APP.exercise = {
+    type: 'triangulation',
+    radial1: v1.radial,
+    radial2: v2.radial,
+    answered: false
+  };
+
+  document.getElementById('promptTitle').textContent = 'TRIANGULACIÓN';
+  document.getElementById('promptText').textContent = `Determina tu posición usando ambas estaciones VOR. Ajusta el OBS de cada instrumento hasta que ambos CDI estén centrados con bandera FROM. Los radiales cruzados dan tu posición exacta. Presiona "Verificar" cuando ambos CDI estén centrados.`;
+
+  const actionsDiv = document.getElementById('promptActions');
+  actionsDiv.innerHTML = '';
+
+  const checkBtn = document.createElement('button');
+  checkBtn.className = 'submit-btn';
+  checkBtn.textContent = 'VERIFICAR FIX';
+  checkBtn.addEventListener('click', () => handleTriangulationAnswer());
+  actionsDiv.appendChild(checkBtn);
+
+  // Initialize dual instruments
+  createVORInstrument(document.getElementById('vorSVG2a'));
+  createVORInstrument(document.getElementById('vorSVG2b'));
+
+  update();
+}
+
+function handleTriangulationAnswer() {
+  if (APP.exercise.answered) return;
+  APP.exercise.answered = true;
+
+  const v1 = computeVOR(APP.aircraft.x, APP.aircraft.y, APP.vor1.x, APP.vor1.y, APP.obs2a);
+  const v2 = computeVOR(APP.aircraft.x, APP.aircraft.y, APP.vor2.x, APP.vor2.y, APP.obs2b);
+
+  const cdi1ok = Math.abs(v1.cdiNormalized) < 0.2;
+  const cdi2ok = Math.abs(v2.cdiNormalized) < 0.2;
+  const flag1ok = v1.flag === 'FROM';
+  const flag2ok = v2.flag === 'FROM';
+
+  const isCorrect = cdi1ok && cdi2ok && flag1ok && flag2ok;
+
+  recordAnswer(isCorrect);
+
+  let explanation = '';
+  if (isCorrect) {
+    explanation = `¡Correcto! Tu fix es: VOR1 R-${v1.radial.toString().padStart(3,'0')} / VOR2 R-${v2.radial.toString().padStart(3,'0')}. Has determinado tu posición exacta por triangulación.`;
+  } else {
+    if (!cdi1ok) explanation += 'CDI del VOR 1 no centrado. ';
+    if (!cdi2ok) explanation += 'CDI del VOR 2 no centrado. ';
+    if (!flag1ok) explanation += 'VOR 1 necesita bandera FROM. ';
+    if (!flag2ok) explanation += 'VOR 2 necesita bandera FROM. ';
+    explanation += `\nLos radiales correctos son: VOR1 R-${APP.exercise.radial1.toString().padStart(3,'0')}, VOR2 R-${APP.exercise.radial2.toString().padStart(3,'0')}.`;
+  }
+
+  showExplanation(isCorrect, explanation);
+  addNextButton(() => startTriangulationMode());
+}
+
+// ═══════════ HELPERS ═══════════
+
+function describeCDI(normalized) {
+  if (Math.abs(normalized) < 0.1) return 'centrado';
+  if (normalized < -0.5) return 'completamente a la izquierda';
+  if (normalized < 0) return 'ligeramente a la izquierda';
+  if (normalized > 0.5) return 'completamente a la derecha';
+  return 'ligeramente a la derecha';
+}
+
+function recordAnswer(correct) {
+  if (correct) {
+    APP.correct++;
+    APP.streak++;
+    if (APP.streak > APP.bestStreak) APP.bestStreak = APP.streak;
+    APP.totalPoints += APP.difficulty === 'easy' ? 10 : APP.difficulty === 'medium' ? 20 : 30;
+    APP.totalPoints += APP.streak * 2; // streak bonus
+    playSuccess();
+  } else {
+    APP.wrong++;
+    APP.streak = 0;
+    playError();
+  }
+
+  updateScoreDisplay();
+}
+
+function updateScoreDisplay() {
+  document.getElementById('correctCount').textContent = APP.correct;
+  document.getElementById('wrongCount').textContent = APP.wrong;
+  document.getElementById('streakCount').textContent = APP.streak;
+  document.getElementById('totalScore').textContent = APP.totalPoints;
+
+  const total = APP.correct + APP.wrong;
+  const accuracy = total > 0 ? Math.round(APP.correct / total * 100) : 0;
+  document.getElementById('totalAccuracy').textContent = total > 0 ? accuracy + '%' : '—';
+  document.getElementById('accuracyBar').style.width = accuracy + '%';
+}
+
+function setFeedback(text, type) {
+  const el = document.getElementById('feedbackText');
+  el.textContent = text;
+  el.className = 'feedback-text ' + type;
+}
+
+function showExplanation(isCorrect, explanation) {
+  const type = isCorrect ? 'success' : 'error';
+  const prefix = isCorrect ? '✓ ¡Correcto! ' : '✗ Incorrecto. ';
+  setFeedback(prefix + explanation, type);
+}
+
+function addNextButton(callback) {
+  const actionsDiv = document.getElementById('promptActions');
+  const nextBtn = document.createElement('button');
+  nextBtn.className = 'next-btn';
+  nextBtn.textContent = 'SIGUIENTE →';
+  nextBtn.style.marginLeft = '8px';
+  nextBtn.addEventListener('click', callback);
+  actionsDiv.appendChild(nextBtn);
+}
+
+// ═══════════ EVENT LISTENERS ═══════════
+
+// Exercise buttons
+document.querySelectorAll('.exercise-btn').forEach(btn => {
+  btn.addEventListener('click', () => setMode(btn.dataset.mode));
+});
+
+// Difficulty buttons
+document.querySelectorAll('.diff-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.diff-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    APP.difficulty = btn.dataset.diff;
+    // Regenerate current exercise
+    if (APP.mode !== 'free' && APP.mode !== 'passage') {
+      setMode(APP.mode);
+    }
+  });
+});
+
+// Keyboard shortcuts for OBS
+document.addEventListener('keydown', (e) => {
+  if (e.target.tagName === 'INPUT') return;
+  if (e.key === 'ArrowLeft') { setOBS(APP.obs - 1); e.preventDefault(); }
+  if (e.key === 'ArrowRight') { setOBS(APP.obs + 1); e.preventDefault(); }
+  if (e.key === 'ArrowUp') { setOBS(APP.obs + 10); e.preventDefault(); }
+  if (e.key === 'ArrowDown') { setOBS(APP.obs - 10); e.preventDefault(); }
+});
+
+// ═══════════ INITIALIZATION ═══════════
+
+function init() {
+  resizeCanvas();
+  window.addEventListener('resize', () => { resizeCanvas(); update(); });
+
+  // Create VOR instruments
+  createVORInstrument(document.getElementById('vorSVG'));
+  createVORInstrument(document.getElementById('vorSVG2a'));
+  createVORInstrument(document.getElementById('vorSVG2b'));
+
+  // Initial update
+  update();
+
+  // Start animation loops
+  passageAnimLoop();
+}
+
+init();
+</script>
+</body>
+</html>
