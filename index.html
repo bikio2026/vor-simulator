@@ -355,8 +355,8 @@ body {
 
 .instrument-wrapper {
   position: relative;
-  width: 340px;
-  height: 340px;
+  width: 400px;
+  height: 400px;
   margin-bottom: 16px;
   flex-shrink: 0;
 }
@@ -376,7 +376,7 @@ body {
   gap: 16px;
   margin-bottom: 20px;
   width: 100%;
-  max-width: 340px;
+  max-width: 400px;
 }
 
 .obs-knob-area {
@@ -437,7 +437,7 @@ body {
 /* Exercise prompt area */
 .exercise-prompt {
   width: 100%;
-  max-width: 380px;
+  max-width: 420px;
   background: rgba(0,0,0,0.3);
   border: 1px solid var(--panel-border);
   border-radius: 10px;
@@ -599,10 +599,25 @@ body {
 .hidden { display: none !important; }
 
 /* ═══════════ RESPONSIVE ═══════════ */
+@media (max-width: 1400px) {
+  .instrument-wrapper {
+    width: 360px;
+    height: 360px;
+  }
+  .exercise-prompt { max-width: 380px; }
+  .obs-controls { max-width: 360px; }
+}
+
 @media (max-width: 1100px) {
   .main-container {
     grid-template-columns: 240px 1fr 1fr;
   }
+  .instrument-wrapper {
+    width: 320px;
+    height: 320px;
+  }
+  .exercise-prompt { max-width: 340px; }
+  .obs-controls { max-width: 320px; }
 }
 
 @media (max-width: 900px) {
@@ -616,9 +631,11 @@ body {
     max-height: 200px;
   }
   .instrument-wrapper {
-    width: 280px;
-    height: 280px;
+    width: 300px;
+    height: 300px;
   }
+  .exercise-prompt { max-width: 320px; }
+  .obs-controls { max-width: 300px; }
 }
 
 /* ═══════════ ANIMATIONS ═══════════ */
@@ -642,8 +659,8 @@ body {
 }
 
 .instrument-pair .instrument-wrapper {
-  width: 240px;
-  height: 240px;
+  width: 280px;
+  height: 280px;
 }
 
 .instrument-pair .obs-controls {
@@ -1146,7 +1163,7 @@ function createVORInstrument(svgEl) {
       text.setAttribute('dominant-baseline', 'central');
       text.setAttribute('fill', ['N','E','S','W'].includes(label) ? '#ffb020' : '#a0a8b8');
       text.setAttribute('font-family', 'Orbitron, sans-serif');
-      text.setAttribute('font-size', ['N','E','S','W'].includes(label) ? '14' : '11');
+      text.setAttribute('font-size', ['N','E','S','W'].includes(label) ? '16' : '13');
       text.setAttribute('font-weight', ['N','E','S','W'].includes(label) ? '700' : '500');
       // Counter-rotate text so it stays upright relative to current rotation
       text.setAttribute('transform', `rotate(0, ${cx + textR * Math.cos(radians)}, ${cy + textR * Math.sin(radians)})`);
@@ -1178,7 +1195,7 @@ function createVORInstrument(svgEl) {
     const dot = document.createElementNS(ns, 'circle');
     dot.setAttribute('cx', cx + i * 15);
     dot.setAttribute('cy', cy);
-    dot.setAttribute('r', 3);
+    dot.setAttribute('r', 3.5);
     dot.setAttribute('fill', 'none');
     dot.setAttribute('stroke', '#505668');
     dot.setAttribute('stroke-width', '1');
@@ -1203,14 +1220,14 @@ function createVORInstrument(svgEl) {
   needle.setAttribute('x2', cx);
   needle.setAttribute('y2', cy + 70);
   needle.setAttribute('stroke', '#e8e8e8');
-  needle.setAttribute('stroke-width', '2.5');
+  needle.setAttribute('stroke-width', '3');
   needle.setAttribute('stroke-linecap', 'round');
   svgEl.appendChild(needle);
 
   // TO/FROM flag area
   const flagBg = document.createElementNS(ns, 'rect');
-  flagBg.setAttribute('x', cx + 40); flagBg.setAttribute('y', cy - 16);
-  flagBg.setAttribute('width', 42); flagBg.setAttribute('height', 20);
+  flagBg.setAttribute('x', cx + 38); flagBg.setAttribute('y', cy - 18);
+  flagBg.setAttribute('width', 50); flagBg.setAttribute('height', 24);
   flagBg.setAttribute('rx', 3);
   flagBg.setAttribute('fill', '#0a0c10');
   flagBg.setAttribute('stroke', '#303440');
@@ -1219,11 +1236,11 @@ function createVORInstrument(svgEl) {
 
   const flagText = document.createElementNS(ns, 'text');
   flagText.id = svgEl.id + '_flag';
-  flagText.setAttribute('x', cx + 61); flagText.setAttribute('y', cy - 3);
+  flagText.setAttribute('x', cx + 63); flagText.setAttribute('y', cy - 3);
   flagText.setAttribute('text-anchor', 'middle');
   flagText.setAttribute('dominant-baseline', 'central');
   flagText.setAttribute('font-family', 'Orbitron, sans-serif');
-  flagText.setAttribute('font-size', '11');
+  flagText.setAttribute('font-size', '13');
   flagText.setAttribute('font-weight', '700');
   flagText.setAttribute('fill', '#808898');
   flagText.textContent = 'OFF';
@@ -1351,41 +1368,55 @@ function drawVORStation(vor, isPrimary) {
   ctx.translate(sx, sy);
 
   // Outer glow
-  const glowGrad = ctx.createRadialGradient(0, 0, 0, 0, 0, 40);
-  glowGrad.addColorStop(0, isPrimary ? 'rgba(0, 212, 255, 0.15)' : 'rgba(255, 176, 32, 0.15)');
+  const glowGrad = ctx.createRadialGradient(0, 0, 0, 0, 0, 50);
+  glowGrad.addColorStop(0, isPrimary ? 'rgba(0, 212, 255, 0.18)' : 'rgba(255, 176, 32, 0.18)');
+  glowGrad.addColorStop(0.6, isPrimary ? 'rgba(0, 212, 255, 0.05)' : 'rgba(255, 176, 32, 0.05)');
   glowGrad.addColorStop(1, 'rgba(0,0,0,0)');
   ctx.fillStyle = glowGrad;
-  ctx.fillRect(-40, -40, 80, 80);
+  ctx.fillRect(-50, -50, 100, 100);
 
   // Hexagon
   ctx.beginPath();
   for (let i = 0; i < 6; i++) {
     const angle = (i * 60 - 30) * Math.PI / 180;
-    const px = 12 * Math.cos(angle);
-    const py = 12 * Math.sin(angle);
+    const px = 16 * Math.cos(angle);
+    const py = 16 * Math.sin(angle);
     i === 0 ? ctx.moveTo(px, py) : ctx.lineTo(px, py);
   }
   ctx.closePath();
   ctx.fillStyle = isPrimary ? 'rgba(0, 212, 255, 0.2)' : 'rgba(255, 176, 32, 0.2)';
   ctx.fill();
   ctx.strokeStyle = isPrimary ? '#00d4ff' : '#ffb020';
-  ctx.lineWidth = 1.5;
+  ctx.lineWidth = 1.8;
+  ctx.stroke();
+
+  // Inner hexagon ring
+  ctx.beginPath();
+  for (let i = 0; i < 6; i++) {
+    const angle = (i * 60 - 30) * Math.PI / 180;
+    const px = 10 * Math.cos(angle);
+    const py = 10 * Math.sin(angle);
+    i === 0 ? ctx.moveTo(px, py) : ctx.lineTo(px, py);
+  }
+  ctx.closePath();
+  ctx.strokeStyle = isPrimary ? 'rgba(0, 212, 255, 0.3)' : 'rgba(255, 176, 32, 0.3)';
+  ctx.lineWidth = 0.8;
   ctx.stroke();
 
   // Center dot
   ctx.beginPath();
-  ctx.arc(0, 0, 3, 0, Math.PI * 2);
+  ctx.arc(0, 0, 3.5, 0, Math.PI * 2);
   ctx.fillStyle = isPrimary ? '#00d4ff' : '#ffb020';
   ctx.fill();
 
   // Label
-  ctx.font = '600 10px "Orbitron", sans-serif';
+  ctx.font = '600 12px "Orbitron", sans-serif';
   ctx.fillStyle = isPrimary ? '#00d4ff' : '#ffb020';
   ctx.textAlign = 'center';
-  ctx.fillText(vor.name, 0, -20);
-  ctx.font = '10px "Share Tech Mono", monospace';
+  ctx.fillText(vor.name, 0, -24);
+  ctx.font = '11px "Share Tech Mono", monospace';
   ctx.fillStyle = 'rgba(255,255,255,0.4)';
-  ctx.fillText(vor.freq, 0, -32);
+  ctx.fillText(vor.freq, 0, -37);
 
   ctx.restore();
 }
@@ -1446,7 +1477,7 @@ function drawAircraft() {
     const hdgRad = (APP.interceptHeading - 90) * Math.PI / 180;
     ctx.beginPath();
     ctx.moveTo(0, 0);
-    ctx.lineTo(30 * Math.cos(hdgRad), 30 * Math.sin(hdgRad));
+    ctx.lineTo(35 * Math.cos(hdgRad), 35 * Math.sin(hdgRad));
     ctx.strokeStyle = 'rgba(255, 176, 32, 0.5)';
     ctx.lineWidth = 1.5;
     ctx.setLineDash([3, 3]);
@@ -1454,33 +1485,95 @@ function drawAircraft() {
     ctx.setLineDash([]);
   }
 
-  // Glow
-  const glow = ctx.createRadialGradient(0, 0, 0, 0, 0, 20);
-  glow.addColorStop(0, 'rgba(255, 176, 32, 0.2)');
+  // Outer glow
+  const glow = ctx.createRadialGradient(0, 0, 0, 0, 0, 28);
+  glow.addColorStop(0, 'rgba(255, 176, 32, 0.25)');
+  glow.addColorStop(0.5, 'rgba(255, 176, 32, 0.08)');
   glow.addColorStop(1, 'rgba(0,0,0,0)');
   ctx.fillStyle = glow;
-  ctx.fillRect(-20, -20, 40, 40);
+  ctx.fillRect(-28, -28, 56, 56);
 
-  // Aircraft icon (simple triangle)
+  // Cessna-style aircraft silhouette
+  const s = 1.4; // scale factor
+
+  // Fuselage
   ctx.beginPath();
-  ctx.moveTo(0, -10);
-  ctx.lineTo(-7, 8);
-  ctx.lineTo(0, 5);
-  ctx.lineTo(7, 8);
+  ctx.moveTo(0, -14 * s);        // nose
+  ctx.lineTo(2 * s, -10 * s);    // right fuselage
+  ctx.lineTo(2.5 * s, 0);        // mid
+  ctx.lineTo(2 * s, 8 * s);      // rear fuselage
+  ctx.lineTo(1.5 * s, 11 * s);   // tail start
+  ctx.lineTo(-1.5 * s, 11 * s);
+  ctx.lineTo(-2 * s, 8 * s);
+  ctx.lineTo(-2.5 * s, 0);
+  ctx.lineTo(-2 * s, -10 * s);
   ctx.closePath();
   ctx.fillStyle = '#ffb020';
+  ctx.fill();
+  ctx.strokeStyle = '#ffd060';
+  ctx.lineWidth = 0.8;
+  ctx.stroke();
+
+  // Wings (swept back slightly)
+  ctx.beginPath();
+  ctx.moveTo(-20 * s, 1 * s);     // left wingtip
+  ctx.lineTo(-18 * s, -1 * s);    // left wing leading
+  ctx.lineTo(-2.5 * s, -3 * s);   // root leading
+  ctx.lineTo(2.5 * s, -3 * s);    // root leading right
+  ctx.lineTo(18 * s, -1 * s);     // right wing leading
+  ctx.lineTo(20 * s, 1 * s);      // right wingtip
+  ctx.lineTo(18 * s, 2 * s);      // right wing trailing
+  ctx.lineTo(2.5 * s, 0);         // root trailing
+  ctx.lineTo(-2.5 * s, 0);
+  ctx.lineTo(-18 * s, 2 * s);     // left wing trailing
+  ctx.closePath();
+  ctx.fillStyle = '#e8a010';
+  ctx.fill();
+  ctx.strokeStyle = '#ffc040';
+  ctx.lineWidth = 0.6;
+  ctx.stroke();
+
+  // Horizontal stabilizer (tail wings)
+  ctx.beginPath();
+  ctx.moveTo(-8 * s, 9 * s);
+  ctx.lineTo(-7 * s, 8 * s);
+  ctx.lineTo(7 * s, 8 * s);
+  ctx.lineTo(8 * s, 9 * s);
+  ctx.lineTo(7 * s, 10 * s);
+  ctx.lineTo(-7 * s, 10 * s);
+  ctx.closePath();
+  ctx.fillStyle = '#e8a010';
   ctx.fill();
   ctx.strokeStyle = '#ffc040';
   ctx.lineWidth = 0.5;
   ctx.stroke();
 
-  // Wings
+  // Vertical stabilizer (dorsal fin)
   ctx.beginPath();
-  ctx.moveTo(-14, 1);
-  ctx.lineTo(14, 1);
-  ctx.strokeStyle = '#ffb020';
-  ctx.lineWidth = 2;
+  ctx.moveTo(0, 7 * s);
+  ctx.lineTo(1 * s, 11 * s);
+  ctx.lineTo(-1 * s, 11 * s);
+  ctx.closePath();
+  ctx.fillStyle = '#cc8800';
+  ctx.fill();
+
+  // Cockpit windshield
+  ctx.beginPath();
+  ctx.ellipse(0, -9 * s, 1.5 * s, 2.5 * s, 0, 0, Math.PI * 2);
+  ctx.fillStyle = 'rgba(0, 212, 255, 0.4)';
+  ctx.fill();
+  ctx.strokeStyle = 'rgba(0, 212, 255, 0.6)';
+  ctx.lineWidth = 0.5;
   ctx.stroke();
+
+  // Engine cowling highlight
+  ctx.beginPath();
+  ctx.moveTo(-1 * s, -13 * s);
+  ctx.lineTo(1 * s, -13 * s);
+  ctx.lineTo(0, -14 * s);
+  ctx.closePath();
+  ctx.fillStyle = '#ffd060';
+  ctx.fill();
 
   ctx.restore();
 }
