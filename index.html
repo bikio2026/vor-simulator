@@ -1061,7 +1061,7 @@ body {
     </svg>
     <div>
       <h1>VOR NAVIGATOR</h1>
-      <div class="subtitle">Simulador de Navegación Aérea <span style="opacity:0.3;font-size:9px;margin-left:6px">v1.1</span></div>
+      <div class="subtitle">Simulador de Navegación Aérea <span style="opacity:0.3;font-size:9px;margin-left:6px">v1.2</span></div>
     </div>
   </div>
   <div class="header-stats">
@@ -2321,6 +2321,9 @@ function handlePositionAnswer(selected, correct, btnEl) {
 
 // — LOCATE AIRCRAFT (instrument-only) —
 function generateLocateExercise() {
+  // Hide map again for new exercise (in case it was revealed from previous answer)
+  document.querySelector('.map-container').classList.add('map-hidden');
+
   // Place aircraft randomly
   const angle = Math.random() * 360;
   const dist = 0.15 + Math.random() * 0.25;
