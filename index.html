@@ -712,7 +712,7 @@ body {
     </svg>
     <div>
       <h1>VOR NAVIGATOR</h1>
-      <div class="subtitle">Simulador de Navegación Aérea</div>
+      <div class="subtitle">Simulador de Navegación Aérea <span style="opacity:0.3;font-size:9px;margin-left:6px">v1.1</span></div>
     </div>
   </div>
   <div class="header-stats">
@@ -1367,56 +1367,74 @@ function drawVORStation(vor, isPrimary) {
   ctx.save();
   ctx.translate(sx, sy);
 
-  // Outer glow
-  const glowGrad = ctx.createRadialGradient(0, 0, 0, 0, 0, 50);
-  glowGrad.addColorStop(0, isPrimary ? 'rgba(0, 212, 255, 0.18)' : 'rgba(255, 176, 32, 0.18)');
-  glowGrad.addColorStop(0.6, isPrimary ? 'rgba(0, 212, 255, 0.05)' : 'rgba(255, 176, 32, 0.05)');
+  // Outer glow — stronger, more visible
+  const glowGrad = ctx.createRadialGradient(0, 0, 0, 0, 0, 65);
+  glowGrad.addColorStop(0, isPrimary ? 'rgba(0, 212, 255, 0.30)' : 'rgba(255, 176, 32, 0.30)');
+  glowGrad.addColorStop(0.4, isPrimary ? 'rgba(0, 212, 255, 0.12)' : 'rgba(255, 176, 32, 0.12)');
+  glowGrad.addColorStop(0.7, isPrimary ? 'rgba(0, 212, 255, 0.04)' : 'rgba(255, 176, 32, 0.04)');
   glowGrad.addColorStop(1, 'rgba(0,0,0,0)');
   ctx.fillStyle = glowGrad;
-  ctx.fillRect(-50, -50, 100, 100);
+  ctx.fillRect(-65, -65, 130, 130);
 
-  // Hexagon
+  // Outer hexagon
   ctx.beginPath();
   for (let i = 0; i < 6; i++) {
     const angle = (i * 60 - 30) * Math.PI / 180;
-    const px = 16 * Math.cos(angle);
-    const py = 16 * Math.sin(angle);
+    const px = 20 * Math.cos(angle);
+    const py = 20 * Math.sin(angle);
     i === 0 ? ctx.moveTo(px, py) : ctx.lineTo(px, py);
   }
   ctx.closePath();
-  ctx.fillStyle = isPrimary ? 'rgba(0, 212, 255, 0.2)' : 'rgba(255, 176, 32, 0.2)';
+  ctx.fillStyle = isPrimary ? 'rgba(0, 212, 255, 0.25)' : 'rgba(255, 176, 32, 0.25)';
   ctx.fill();
   ctx.strokeStyle = isPrimary ? '#00d4ff' : '#ffb020';
-  ctx.lineWidth = 1.8;
+  ctx.lineWidth = 2.2;
   ctx.stroke();
 
   // Inner hexagon ring
   ctx.beginPath();
   for (let i = 0; i < 6; i++) {
     const angle = (i * 60 - 30) * Math.PI / 180;
-    const px = 10 * Math.cos(angle);
-    const py = 10 * Math.sin(angle);
+    const px = 12 * Math.cos(angle);
+    const py = 12 * Math.sin(angle);
     i === 0 ? ctx.moveTo(px, py) : ctx.lineTo(px, py);
   }
   ctx.closePath();
-  ctx.strokeStyle = isPrimary ? 'rgba(0, 212, 255, 0.3)' : 'rgba(255, 176, 32, 0.3)';
-  ctx.lineWidth = 0.8;
+  ctx.strokeStyle = isPrimary ? 'rgba(0, 212, 255, 0.5)' : 'rgba(255, 176, 32, 0.5)';
+  ctx.lineWidth = 1;
   ctx.stroke();
 
   // Center dot
   ctx.beginPath();
-  ctx.arc(0, 0, 3.5, 0, Math.PI * 2);
+  ctx.arc(0, 0, 4, 0, Math.PI * 2);
   ctx.fillStyle = isPrimary ? '#00d4ff' : '#ffb020';
   ctx.fill();
 
-  // Label
-  ctx.font = '600 12px "Orbitron", sans-serif';
+  // Label background for better readability
+  const nameText = vor.name;
+  const freqText = vor.freq;
+  ctx.font = '700 14px "Orbitron", sans-serif';
+  const nameW = ctx.measureText(nameText).width;
+  ctx.font = '600 12px "Share Tech Mono", monospace';
+  const freqW = ctx.measureText(freqText).width;
+  const bgW = Math.max(nameW, freqW) + 12;
+
+  // Semi-transparent background behind labels
+  ctx.fillStyle = 'rgba(10, 12, 16, 0.75)';
+  ctx.beginPath();
+  ctx.roundRect(-bgW/2, -52, bgW, 26, 3);
+  ctx.fill();
+
+  // Station name — larger, bolder
+  ctx.font = '700 14px "Orbitron", sans-serif';
   ctx.fillStyle = isPrimary ? '#00d4ff' : '#ffb020';
   ctx.textAlign = 'center';
-  ctx.fillText(vor.name, 0, -24);
-  ctx.font = '11px "Share Tech Mono", monospace';
-  ctx.fillStyle = 'rgba(255,255,255,0.4)';
-  ctx.fillText(vor.freq, 0, -37);
+  ctx.fillText(nameText, 0, -30);
+
+  // Frequency — much brighter
+  ctx.font = '600 12px "Share Tech Mono", monospace';
+  ctx.fillStyle = isPrimary ? 'rgba(0, 212, 255, 0.85)' : 'rgba(255, 176, 32, 0.85)';
+  ctx.fillText(freqText, 0, -42);
 
   ctx.restore();
 }
@@ -1439,14 +1457,15 @@ function drawRadials(vor, selectedObs) {
 
     // Labels for every 30°
     if (deg % 30 === 0) {
-      const labelDist = 50;
+      const labelDist = 55;
       const lx = sx + labelDist * Math.cos(rad);
       const ly = sy + labelDist * Math.sin(rad);
-      ctx.font = '9px "Share Tech Mono", monospace';
-      ctx.fillStyle = 'rgba(0, 212, 255, 0.25)';
+      const label = deg === 0 ? '360' : deg.toString().padStart(3, '0');
+      ctx.font = '600 11px "Share Tech Mono", monospace';
+      ctx.fillStyle = 'rgba(0, 212, 255, 0.50)';
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
-      ctx.fillText(deg === 0 ? '360' : deg.toString().padStart(3, '0'), lx, ly);
+      ctx.fillText(label, lx, ly);
     }
   }
 
@@ -2066,9 +2085,12 @@ function startPassageMode() {
       <button class="play-btn" id="passagePlay">▶ Iniciar Vuelo</button>
       <button class="play-btn" id="passageReset" style="border-color: var(--accent-amber); color: var(--accent-amber);">↺ Reiniciar</button>
       <select class="speed-select" id="passageSpeedSel">
+        <option value="0.1">0.1x</option>
+        <option value="0.25">0.25x</option>
         <option value="0.5">0.5x</option>
         <option value="1" selected>1x</option>
         <option value="2">2x</option>
+        <option value="3">3x</option>
       </select>
     </div>
   `;
