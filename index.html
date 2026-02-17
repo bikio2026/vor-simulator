@@ -191,11 +191,17 @@ body {
   position: relative;
 }
 .map-container.map-hidden canvas {
-  filter: blur(20px) brightness(0.3);
-  pointer-events: none;
+  visibility: hidden;
+}
+.map-container.map-hidden::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--cockpit-bg);
+  z-index: 4;
 }
 .map-container.map-hidden::after {
-  content: '👁 MAPA OCULTO — Usa solo el instrumento';
+  content: '👁  MAPA OCULTO — Usa solo el instrumento';
   position: absolute;
   top: 50%;
   left: 50%;
@@ -472,13 +478,41 @@ body {
   margin-bottom: 16px;
 }
 
+.prompt-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
 .prompt-title {
   font-family: 'Orbitron', sans-serif;
   font-size: 13px;
   letter-spacing: 2px;
   color: var(--accent-amber);
-  margin-bottom: 10px;
 }
+
+.reload-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 1px solid var(--panel-border);
+  background: rgba(0, 212, 255, 0.08);
+  color: var(--accent-cyan);
+  font-size: 18px;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.reload-btn:hover {
+  background: rgba(0, 212, 255, 0.2);
+  border-color: var(--accent-cyan);
+  transform: rotate(90deg);
+}
+.reload-btn.hidden { display: none; }
 
 .prompt-text {
   font-size: 15px;
@@ -558,6 +592,25 @@ body {
 }
 
 .next-btn:hover { background: rgba(255, 176, 32, 0.2); }
+
+.inline-explanation {
+  margin-top: 12px;
+  padding: 10px 14px;
+  border-radius: 6px;
+  font-size: 13px;
+  line-height: 1.5;
+  animation: slide-up 0.3s ease;
+}
+.inline-explanation.success {
+  background: rgba(0, 230, 118, 0.1);
+  border-left: 3px solid var(--success);
+  color: var(--success);
+}
+.inline-explanation.error {
+  background: rgba(255, 68, 68, 0.1);
+  border-left: 3px solid var(--error);
+  color: #ff8888;
+}
 
 /* Input for OBS exercises */
 .obs-input-group {
@@ -1223,7 +1276,10 @@ body {
 
     <!-- Exercise prompt -->
     <div class="exercise-prompt" id="exercisePrompt">
-      <div class="prompt-title" id="promptTitle">PRÁCTICA LIBRE</div>
+      <div class="prompt-header">
+        <div class="prompt-title" id="promptTitle">PRÁCTICA LIBRE</div>
+        <button class="reload-btn hidden" id="reloadBtn" title="Otro ejercicio">↻</button>
+      </div>
       <div class="prompt-text" id="promptText">Arrastra el avión por el mapa y observa cómo responde el instrumento VOR. Ajusta el OBS para explorar diferentes radiales.</div>
       <div class="prompt-actions" id="promptActions"></div>
     </div>
@@ -2188,6 +2244,23 @@ function setMode(mode) {
     clearInactivityTimer();
   }
 
+  // Reload button — show for exercises that support it
+  const reloadBtn = document.getElementById('reloadBtn');
+  const reloadModes = { position: generatePositionExercise, radial: generateRadialExercise, obs: generateOBSExercise, intercept: generateInterceptExercise, locate: generateLocateExercise };
+  if (reloadModes[mode]) {
+    reloadBtn.classList.remove('hidden');
+    reloadBtn.onclick = () => {
+      APP.exercise = null;
+      resetHints();
+      reloadModes[mode]();
+      update();
+      if (isExerciseMode) startInactivityTimer();
+    };
+  } else {
+    reloadBtn.classList.add('hidden');
+    reloadBtn.onclick = null;
+  }
+
   switch (mode) {
     case 'free': startFreeMode(); break;
     case 'position': generatePositionExercise(); break;
@@ -2884,7 +2957,14 @@ function setFeedback(text, type) {
 function showExplanation(isCorrect, explanation) {
   const type = isCorrect ? 'success' : 'error';
   const prefix = isCorrect ? '✓ ¡Correcto! ' : '✗ Incorrecto. ';
+  // Show in sidebar feedback area
   setFeedback(prefix + explanation, type);
+  // Also show inline in the prompt area for visibility
+  const actionsDiv = document.getElementById('promptActions');
+  const explDiv = document.createElement('div');
+  explDiv.className = 'inline-explanation ' + type;
+  explDiv.textContent = prefix + explanation;
+  actionsDiv.appendChild(explDiv);
 }
 
 function addNextButton(callback) {
