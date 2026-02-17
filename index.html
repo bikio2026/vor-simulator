@@ -1097,6 +1097,422 @@ body {
     width: 300px;
   }
 }
+
+/* ═══════════ EXAM MODE ═══════════ */
+
+/* Exam button in sidebar */
+.exam-btn {
+  background: rgba(255, 176, 32, 0.06);
+  border: 2px solid rgba(255, 176, 32, 0.4);
+  border-radius: 10px;
+  padding: 12px 14px;
+  color: var(--accent-amber);
+  font-family: 'Exo 2', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.3s;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.exam-btn:hover {
+  background: rgba(255, 176, 32, 0.12);
+  border-color: var(--accent-amber);
+  box-shadow: 0 0 16px rgba(255, 176, 32, 0.15), inset 0 0 8px rgba(255, 176, 32, 0.05);
+  transform: translateY(-1px);
+}
+
+.exam-btn .ex-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  flex-shrink: 0;
+  background: rgba(255, 176, 32, 0.18);
+}
+
+.exam-btn .ex-info {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.exam-btn .ex-name {
+  font-weight: 700;
+  font-size: 14px;
+  letter-spacing: 0.5px;
+}
+
+.exam-btn .ex-desc {
+  font-size: 12px;
+  color: var(--text-dim);
+}
+
+/* Disabled sidebar buttons during exam */
+.sidebar.exam-locked .exercise-btn,
+.sidebar.exam-locked .diff-btn {
+  opacity: 0.3;
+  pointer-events: none;
+  cursor: not-allowed;
+}
+
+.sidebar.exam-locked .exam-btn {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+/* Exam progress bar */
+.exam-progress-bar {
+  width: 100%;
+  max-width: 380px;
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid var(--panel-border);
+  border-radius: 10px;
+  padding: 10px 14px;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.exam-progress-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+}
+
+.exam-progress-label {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 12px;
+  letter-spacing: 2px;
+  color: var(--accent-amber);
+}
+
+.exam-progress-track {
+  width: 100%;
+  height: 6px;
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.exam-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent-amber), #ffd060);
+  border-radius: 3px;
+  transition: width 0.4s ease;
+}
+
+/* Exam timer */
+.exam-timer {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--accent-cyan);
+  text-align: center;
+  min-width: 55px;
+  text-shadow: 0 0 8px rgba(0, 212, 255, 0.3);
+}
+
+.exam-timer.warning {
+  color: var(--error);
+  text-shadow: 0 0 12px rgba(255, 68, 68, 0.4);
+  animation: timer-pulse 1s ease-in-out infinite;
+}
+
+@keyframes timer-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+/* Exam results screen */
+.exam-results {
+  width: 100%;
+  max-width: 420px;
+  text-align: center;
+  animation: slide-up 0.5s ease;
+}
+
+.exam-results-score {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 48px;
+  font-weight: 900;
+  color: var(--text-bright);
+  margin-bottom: 4px;
+}
+
+.exam-results-percent {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 22px;
+  color: var(--text-dim);
+  margin-bottom: 16px;
+}
+
+.exam-grade {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  padding: 10px 20px;
+  border-radius: 8px;
+  margin-bottom: 8px;
+  display: inline-block;
+}
+
+.exam-grade.gold {
+  color: #ffd700;
+  background: rgba(255, 215, 0, 0.1);
+  border: 1px solid rgba(255, 215, 0, 0.3);
+  text-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
+}
+
+.exam-grade.green {
+  color: var(--accent-green);
+  background: rgba(0, 230, 118, 0.1);
+  border: 1px solid rgba(0, 230, 118, 0.3);
+}
+
+.exam-grade.cyan {
+  color: var(--accent-cyan);
+  background: rgba(0, 212, 255, 0.1);
+  border: 1px solid rgba(0, 212, 255, 0.3);
+}
+
+.exam-grade.red {
+  color: var(--error);
+  background: rgba(255, 68, 68, 0.1);
+  border: 1px solid rgba(255, 68, 68, 0.3);
+}
+
+.exam-grade-subtitle {
+  font-size: 13px;
+  color: var(--text-dim);
+  margin-bottom: 20px;
+}
+
+/* Exam breakdown table */
+.exam-breakdown {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 20px;
+  text-align: left;
+}
+
+.exam-breakdown th {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 10px;
+  letter-spacing: 2px;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  padding: 6px 8px;
+  border-bottom: 1px solid var(--panel-border);
+}
+
+.exam-breakdown td {
+  font-size: 13px;
+  color: var(--text-primary);
+  padding: 6px 8px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+}
+
+.exam-breakdown td:last-child {
+  text-align: right;
+  font-family: 'Share Tech Mono', monospace;
+  font-weight: 600;
+}
+
+.exam-breakdown .perfect {
+  color: var(--accent-green);
+}
+
+.exam-breakdown .partial {
+  color: var(--accent-amber);
+}
+
+.exam-breakdown .failed {
+  color: var(--error);
+}
+
+.exam-total-time {
+  font-size: 13px;
+  color: var(--text-dim);
+  margin-bottom: 20px;
+}
+
+.exam-total-time span {
+  color: var(--accent-cyan);
+  font-family: 'Share Tech Mono', monospace;
+}
+
+/* Exam action buttons */
+.exam-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center;
+}
+
+.cert-btn {
+  padding: 12px 24px;
+  border: 2px solid #ffd700;
+  border-radius: 8px;
+  background: rgba(255, 215, 0, 0.1);
+  color: #ffd700;
+  font-family: 'Orbitron', sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.cert-btn:hover {
+  background: rgba(255, 215, 0, 0.2);
+  box-shadow: 0 0 16px rgba(255, 215, 0, 0.2);
+  transform: translateY(-1px);
+}
+
+.exam-retry-btn {
+  padding: 12px 24px;
+  border: 1px solid var(--accent-amber);
+  border-radius: 8px;
+  background: rgba(255, 176, 32, 0.1);
+  color: var(--accent-amber);
+  font-family: 'Orbitron', sans-serif;
+  font-size: 12px;
+  letter-spacing: 1px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.exam-retry-btn:hover {
+  background: rgba(255, 176, 32, 0.2);
+}
+
+.exam-back-btn {
+  padding: 12px 24px;
+  border: 1px solid var(--panel-border);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--text-primary);
+  font-family: 'Exo 2', sans-serif;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.exam-back-btn:hover {
+  border-color: var(--accent-cyan);
+  background: rgba(0, 212, 255, 0.05);
+}
+
+/* Pre-exam screen */
+.exam-prescreen {
+  text-align: center;
+}
+
+.exam-prescreen h3 {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 16px;
+  color: var(--accent-amber);
+  letter-spacing: 2px;
+  margin-bottom: 16px;
+}
+
+.exam-rules {
+  list-style: none;
+  text-align: left;
+  margin-bottom: 20px;
+}
+
+.exam-rules li {
+  font-size: 13px;
+  color: var(--text-primary);
+  padding: 6px 0;
+  padding-left: 24px;
+  position: relative;
+  line-height: 1.5;
+}
+
+.exam-rules li::before {
+  content: '\25B8';
+  position: absolute;
+  left: 6px;
+  color: var(--accent-amber);
+}
+
+.exam-start-btn {
+  padding: 14px 36px;
+  border: 2px solid var(--accent-amber);
+  border-radius: 8px;
+  background: linear-gradient(135deg, rgba(255, 176, 32, 0.15), rgba(255, 176, 32, 0.05));
+  color: var(--accent-amber);
+  font-family: 'Orbitron', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.exam-start-btn:hover {
+  background: linear-gradient(135deg, rgba(255, 176, 32, 0.25), rgba(255, 176, 32, 0.10));
+  box-shadow: 0 0 20px rgba(255, 176, 32, 0.2);
+  transform: translateY(-2px);
+}
+
+/* Brief exam feedback flash */
+.exam-feedback-flash {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 600;
+  padding: 20px 40px;
+  border-radius: 12px;
+  font-family: 'Orbitron', sans-serif;
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  pointer-events: none;
+  animation: flash-in-out 1.5s ease forwards;
+}
+
+.exam-feedback-flash.correct {
+  background: rgba(0, 230, 118, 0.2);
+  border: 2px solid var(--success);
+  color: var(--success);
+  text-shadow: 0 0 12px rgba(0, 230, 118, 0.4);
+}
+
+.exam-feedback-flash.incorrect {
+  background: rgba(255, 68, 68, 0.2);
+  border: 2px solid var(--error);
+  color: var(--error);
+  text-shadow: 0 0 12px rgba(255, 68, 68, 0.4);
+}
+
+.exam-feedback-flash.timeout {
+  background: rgba(255, 176, 32, 0.2);
+  border: 2px solid var(--accent-amber);
+  color: var(--accent-amber);
+}
+
+@keyframes flash-in-out {
+  0% { opacity: 0; transform: translate(-50%, -50%) scale(0.8); }
+  15% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+  70% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+  100% { opacity: 0; transform: translate(-50%, -50%) scale(0.9); }
+}
 </style>
 </head>
 <body>
@@ -1135,6 +1551,10 @@ body {
   <!-- SIDEBAR -->
   <aside class="sidebar">
     <div class="section-title">Ejercicios</div>
+    <button class="exam-btn" id="examBtn">
+      <div class="ex-icon">&#128203;</div>
+      <div class="ex-info"><div class="ex-name">Modo Examen</div><div class="ex-desc">15 preguntas cronometradas</div></div>
+    </button>
     <div class="exercise-list">
       <button class="exercise-btn active" data-mode="free">
         <div class="ex-icon free">✈</div>
@@ -1358,6 +1778,18 @@ const APP = {
   helpOpen: false,
   inactivityTimer: null,
   inactivityNudgeTimer: null,
+
+  // Exam mode
+  exam: {
+    active: false,
+    questions: [],
+    currentIndex: 0,
+    answers: [],
+    startTime: null,
+    questionStartTime: null,
+    timer: null,
+    timePerQuestion: 120
+  },
 };
 
 // ═══════════ AUDIO ═══════════
@@ -2092,6 +2524,7 @@ function getMapPos(e) {
 }
 
 canvas.addEventListener('mousedown', (e) => {
+  if (APP.exam.active) return;
   if (APP.mode === 'passage' && APP.passagePlaying) return;
   if (APP.locateDragDisabled) return;
   const pos = getMapPos(e);
@@ -2118,6 +2551,7 @@ canvas.addEventListener('mouseleave', () => { APP.dragging = false; });
 // Touch support
 canvas.addEventListener('touchstart', (e) => {
   e.preventDefault();
+  if (APP.exam.active) return;
   if (APP.mode === 'passage' && APP.passagePlaying) return;
   const touch = e.touches[0];
   const pos = getMapPos(touch);
@@ -2211,6 +2645,9 @@ function update() {
 // ═══════════ EXERCISE SYSTEM ═══════════
 
 function setMode(mode) {
+  // Block mode changes during active exam
+  if (APP.exam.active) return;
+
   APP.mode = mode;
   APP.passagePlaying = false;
   APP.exercise = null;
@@ -3404,6 +3841,803 @@ document.getElementById('helpOverlay').addEventListener('click', closeHelp);
     }
   }, { passive: true });
 });
+
+// ═══════════ EXAM MODE SYSTEM ═══════════
+
+function showExamPrescreen() {
+  // Prevent starting if already in exam
+  if (APP.exam.active) return;
+
+  // Switch to a neutral mode visually
+  APP.mode = 'free';
+  document.querySelectorAll('.exercise-btn').forEach(b => b.classList.remove('active'));
+
+  // Toggle instruments to single
+  document.getElementById('singleInstrument').classList.remove('hidden');
+  document.getElementById('dualInstrument').classList.add('hidden');
+  document.querySelector('.map-container').classList.remove('map-hidden');
+
+  // Hide help button and reload button
+  document.getElementById('helpBtn').classList.add('hidden');
+  document.getElementById('reloadBtn').classList.add('hidden');
+
+  // Show pre-exam screen in the prompt area
+  document.getElementById('promptTitle').textContent = 'MODO EXAMEN';
+  document.getElementById('promptText').innerHTML = '';
+
+  const actionsDiv = document.getElementById('promptActions');
+  actionsDiv.innerHTML = `
+    <div class="exam-prescreen">
+      <h3>EVALUACI\u00d3N VOR</h3>
+      <ul class="exam-rules">
+        <li>15 preguntas de todos los tipos de ejercicio</li>
+        <li>2 minutos por pregunta</li>
+        <li>El avi\u00f3n se posiciona autom\u00e1ticamente</li>
+        <li>No puedes mover el avi\u00f3n durante el examen</li>
+        <li>No hay pistas disponibles</li>
+        <li>Necesitas 60% para aprobar y obtener certificado</li>
+      </ul>
+      <button class="exam-start-btn" id="examStartBtn">COMENZAR EXAMEN</button>
+    </div>
+  `;
+
+  document.getElementById('examStartBtn').addEventListener('click', startExam);
+
+  setFeedback('Revisa las reglas del examen y presiona COMENZAR cuando est\u00e9s listo.', 'info');
+}
+
+function startExam() {
+  // Initialize exam state
+  APP.exam.active = true;
+  APP.exam.currentIndex = 0;
+  APP.exam.answers = [];
+  APP.exam.startTime = Date.now();
+  APP.exam.questionStartTime = null;
+
+  // Generate the 15 question sequence: 3 position, 2 locate, 3 radial, 4 obs, 3 intercept
+  const questionTypes = [];
+  for (let i = 0; i < 3; i++) questionTypes.push('position');
+  for (let i = 0; i < 2; i++) questionTypes.push('locate');
+  for (let i = 0; i < 3; i++) questionTypes.push('radial');
+  for (let i = 0; i < 4; i++) questionTypes.push('obs');
+  for (let i = 0; i < 3; i++) questionTypes.push('intercept');
+
+  // Shuffle using Fisher-Yates
+  for (let i = questionTypes.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [questionTypes[i], questionTypes[j]] = [questionTypes[j], questionTypes[i]];
+  }
+
+  APP.exam.questions = questionTypes;
+
+  // Lock sidebar
+  document.querySelector('.sidebar').classList.add('exam-locked');
+
+  // Hide help, reload
+  document.getElementById('helpBtn').classList.add('hidden');
+  document.getElementById('reloadBtn').classList.add('hidden');
+  closeHelp();
+  clearInactivityTimer();
+
+  // Ensure single instrument mode
+  document.getElementById('singleInstrument').classList.remove('hidden');
+  document.getElementById('dualInstrument').classList.add('hidden');
+
+  setFeedback('Examen en progreso. Concéntrate en cada pregunta.', 'info');
+
+  // Load first question
+  loadExamQuestion();
+}
+
+function loadExamQuestion() {
+  const idx = APP.exam.currentIndex;
+  const type = APP.exam.questions[idx];
+
+  // Set mode for the question type (to use correct rendering)
+  APP.mode = type === 'locate' ? 'locate' : (type === 'intercept' ? 'intercept' : 'free');
+
+  // Handle locate mode map hiding
+  document.querySelector('.map-container').classList.toggle('map-hidden', type === 'locate');
+  APP.locateDragDisabled = true; // Always disabled in exam
+
+  // Ensure single instrument
+  document.getElementById('singleInstrument').classList.remove('hidden');
+  document.getElementById('dualInstrument').classList.add('hidden');
+
+  // Insert progress bar above the instrument
+  renderExamProgressBar();
+
+  // Start timer
+  APP.exam.questionStartTime = Date.now();
+  startExamTimer();
+
+  // Generate question based on type
+  generateExamQuestion(type);
+
+  update();
+}
+
+function renderExamProgressBar() {
+  const idx = APP.exam.currentIndex;
+  const total = APP.exam.questions.length;
+  const pct = ((idx) / total) * 100;
+
+  // Remove existing progress bar if any
+  const existing = document.getElementById('examProgressBar');
+  if (existing) existing.remove();
+
+  const bar = document.createElement('div');
+  bar.className = 'exam-progress-bar';
+  bar.id = 'examProgressBar';
+  bar.innerHTML = `
+    <div class="exam-progress-info">
+      <div class="exam-progress-label">PREGUNTA ${idx + 1} / ${total}</div>
+      <div class="exam-progress-track">
+        <div class="exam-progress-fill" style="width: ${pct}%"></div>
+      </div>
+    </div>
+    <div class="exam-timer" id="examTimerDisplay">2:00</div>
+  `;
+
+  // Insert before the exercise-prompt
+  const prompt = document.getElementById('exercisePrompt');
+  prompt.parentNode.insertBefore(bar, prompt);
+}
+
+function startExamTimer() {
+  // Clear previous timer
+  if (APP.exam.timer) {
+    clearInterval(APP.exam.timer);
+    APP.exam.timer = null;
+  }
+
+  const timerDisplay = document.getElementById('examTimerDisplay');
+  if (!timerDisplay) return;
+
+  APP.exam.timer = setInterval(() => {
+    if (!APP.exam.active) {
+      clearInterval(APP.exam.timer);
+      APP.exam.timer = null;
+      return;
+    }
+
+    const elapsed = (Date.now() - APP.exam.questionStartTime) / 1000;
+    const remaining = Math.max(0, APP.exam.timePerQuestion - elapsed);
+    const mins = Math.floor(remaining / 60);
+    const secs = Math.floor(remaining % 60);
+
+    const display = document.getElementById('examTimerDisplay');
+    if (display) {
+      display.textContent = `${mins}:${secs.toString().padStart(2, '0')}`;
+      display.classList.toggle('warning', remaining <= 30);
+    }
+
+    if (remaining <= 0) {
+      clearInterval(APP.exam.timer);
+      APP.exam.timer = null;
+      handleExamTimeout();
+    }
+  }, 250);
+}
+
+function handleExamTimeout() {
+  // Record as incorrect due to timeout
+  const type = APP.exam.questions[APP.exam.currentIndex];
+  const timeTaken = APP.exam.timePerQuestion;
+
+  APP.exam.answers.push({
+    correct: false,
+    timeTaken: timeTaken,
+    type: type,
+    timeout: true
+  });
+
+  showExamFeedback('timeout', 'TIEMPO AGOTADO');
+
+  // Disable any remaining answer buttons
+  document.querySelectorAll('.answer-btn, .submit-btn').forEach(b => {
+    b.disabled = true;
+    b.style.pointerEvents = 'none';
+  });
+
+  setTimeout(() => advanceExamQuestion(), 1500);
+}
+
+function generateExamQuestion(type) {
+  // Clear intercept target from previous questions
+  APP.interceptTarget = null;
+
+  // Place aircraft randomly for this question
+  const angle = Math.random() * 360;
+  const dist = 0.15 + Math.random() * 0.25;
+  const rad = angle * Math.PI / 180;
+  APP.aircraft.x = APP.vor1.x + dist * Math.sin(rad);
+  APP.aircraft.y = APP.vor1.y - dist * Math.cos(rad);
+  APP.aircraft.x = Math.max(0.05, Math.min(0.95, APP.aircraft.x));
+  APP.aircraft.y = Math.max(0.05, Math.min(0.95, APP.aircraft.y));
+
+  // Set a random OBS
+  const obsOptions = APP.difficulty === 'easy' ?
+    [0, 30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330] :
+    Array.from({length: 36}, (_, i) => i * 10);
+  APP.obs = obsOptions[Math.floor(Math.random() * obsOptions.length)] || 360;
+  document.getElementById('obsValue').textContent = APP.obs.toString().padStart(3, '0');
+
+  switch(type) {
+    case 'position': generateExamPositionQ(); break;
+    case 'locate': generateExamLocateQ(); break;
+    case 'radial': generateExamRadialQ(); break;
+    case 'obs': generateExamOBSQ(); break;
+    case 'intercept': generateExamInterceptQ(); break;
+  }
+}
+
+function generateExamPositionQ() {
+  const vor = computeVOR(APP.aircraft.x, APP.aircraft.y, APP.vor1.x, APP.vor1.y, APP.obs);
+  const correctRadial = vor.radial;
+  const positions = generatePositionChoices(correctRadial);
+
+  APP.exercise = { type: 'position', correctAnswer: correctRadial, answered: false };
+
+  document.getElementById('promptTitle').textContent = 'EXAMEN \u2014 POSICI\u00d3N';
+  document.getElementById('promptText').textContent = `OBS en ${APP.obs.toString().padStart(3,'0')}\u00b0, bandera ${vor.flag}, CDI ${describeCDI(vor.cdiNormalized)}. \u00bfEn qu\u00e9 radial/cuadrante te encuentras?`;
+
+  const actionsDiv = document.getElementById('promptActions');
+  actionsDiv.innerHTML = '';
+  positions.forEach(pos => {
+    const btn = document.createElement('button');
+    btn.className = 'answer-btn';
+    btn.textContent = pos.label;
+    btn.dataset.value = pos.value;
+    btn.addEventListener('click', () => {
+      if (APP.exercise.answered) return;
+      APP.exercise.answered = true;
+
+      const isCorrectQuadrant = APP.difficulty === 'easy';
+      let isCorrect;
+      if (isCorrectQuadrant) {
+        const getQuad = r => r <= 90 ? 'NE' : r <= 180 ? 'SE' : r <= 270 ? 'SO' : 'NO';
+        isCorrect = getQuad(pos.value) === getQuad(correctRadial) || pos.value === correctRadial;
+      } else {
+        isCorrect = Math.abs(angleDiff(pos.value, correctRadial)) <= 5;
+      }
+
+      // Highlight correct/incorrect
+      document.querySelectorAll('.answer-btn').forEach(b => {
+        const val = parseInt(b.dataset.value);
+        if (isCorrectQuadrant) {
+          const getQuad = r => r <= 90 ? 'NE' : r <= 180 ? 'SE' : r <= 270 ? 'SO' : 'NO';
+          if (getQuad(val) === getQuad(correctRadial) || val === correctRadial) b.classList.add('correct');
+        } else {
+          if (Math.abs(angleDiff(val, correctRadial)) <= 5) b.classList.add('correct');
+        }
+        b.disabled = true;
+      });
+      if (!isCorrect) btn.classList.add('incorrect');
+
+      handleExamAnswer(isCorrect);
+    });
+    actionsDiv.appendChild(btn);
+  });
+}
+
+function generateExamLocateQ() {
+  document.querySelector('.map-container').classList.add('map-hidden');
+
+  const vor = computeVOR(APP.aircraft.x, APP.aircraft.y, APP.vor1.x, APP.vor1.y, APP.obs);
+  const actualRadial = Math.round(vor.radial);
+
+  function getOctant(r) {
+    r = ((r % 360) + 360) % 360;
+    if (r >= 338 || r < 23) return 'N';
+    if (r >= 23 && r < 68) return 'NE';
+    if (r >= 68 && r < 113) return 'E';
+    if (r >= 113 && r < 158) return 'SE';
+    if (r >= 158 && r < 203) return 'S';
+    if (r >= 203 && r < 248) return 'SO';
+    if (r >= 248 && r < 293) return 'O';
+    return 'NO';
+  }
+
+  const octantNames = { 'N':'Norte','NE':'Noreste','E':'Este','SE':'Sureste','S':'Sur','SO':'Suroeste','O':'Oeste','NO':'Noroeste' };
+  const correctOctant = getOctant(actualRadial);
+
+  // 4 options
+  const octants = ['N', 'NE', 'E', 'SE', 'S', 'SO', 'O', 'NO'];
+  let wrongOctants = octants.filter(o => o !== correctOctant);
+  for (let i = wrongOctants.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [wrongOctants[i], wrongOctants[j]] = [wrongOctants[j], wrongOctants[i]];
+  }
+  const selected = [correctOctant, ...wrongOctants.slice(0, 3)];
+  for (let i = selected.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [selected[i], selected[j]] = [selected[j], selected[i]];
+  }
+  const allOptions = selected.map(o => ({ text: `${octantNames[o]} del VOR`, correct: o === correctOctant }));
+
+  APP.exercise = { type: 'locate', correctOctant, actualRadial, options: allOptions, answered: false };
+
+  document.getElementById('promptTitle').textContent = 'EXAMEN \u2014 LOCALIZAR';
+  document.getElementById('promptText').textContent = `Mapa oculto. OBS en ${APP.obs}\u00b0, bandera ${vor.flag}, CDI ${Math.abs(vor.cdiNormalized) < 0.15 ? 'centrado' : 'deflectado a la ' + (vor.cdiNormalized > 0 ? 'derecha' : 'izquierda')}. \u00bfD\u00f3nde est\u00e1 el avi\u00f3n?`;
+
+  const actionsDiv = document.getElementById('promptActions');
+  actionsDiv.innerHTML = allOptions.map((opt, i) =>
+    `<button class="answer-btn" data-idx="${i}">${opt.text}</button>`
+  ).join('');
+
+  actionsDiv.querySelectorAll('.answer-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      if (APP.exercise.answered) return;
+      APP.exercise.answered = true;
+
+      const idx = parseInt(btn.dataset.idx);
+      const isCorrect = allOptions[idx].correct;
+
+      actionsDiv.querySelectorAll('.answer-btn').forEach(b => {
+        b.disabled = true;
+        if (allOptions[parseInt(b.dataset.idx)].correct) b.style.background = 'rgba(0,230,118,0.3)';
+      });
+      if (!isCorrect) btn.style.background = 'rgba(255,68,68,0.3)';
+
+      // Reveal map
+      document.querySelector('.map-container').classList.remove('map-hidden');
+
+      handleExamAnswer(isCorrect);
+    });
+  });
+}
+
+function generateExamRadialQ() {
+  const vor = computeVOR(APP.aircraft.x, APP.aircraft.y, APP.vor1.x, APP.vor1.y, APP.obs);
+  const correctRadial = vor.radial;
+
+  const choices = [correctRadial];
+  const offsets = APP.difficulty === 'easy' ? [90, 180, 270] : APP.difficulty === 'medium' ? [30, -30, 180] : [10, -10, 20];
+  offsets.forEach(o => {
+    let r = normAngle(correctRadial + o);
+    if (r === 0) r = 360;
+    choices.push(r);
+  });
+  const shuffled = choices.sort(() => Math.random() - 0.5);
+
+  APP.exercise = { type: 'radial', correctAnswer: correctRadial, answered: false };
+
+  document.getElementById('promptTitle').textContent = 'EXAMEN \u2014 RADIAL';
+  document.getElementById('promptText').textContent = '\u00bfEn qu\u00e9 radial del VOR te encuentras?';
+
+  const actionsDiv = document.getElementById('promptActions');
+  actionsDiv.innerHTML = '';
+  shuffled.forEach(r => {
+    const btn = document.createElement('button');
+    btn.className = 'answer-btn';
+    btn.textContent = `R-${r.toString().padStart(3, '0')}`;
+    btn.dataset.value = r;
+    btn.addEventListener('click', () => {
+      if (APP.exercise.answered) return;
+      APP.exercise.answered = true;
+
+      const isCorrect = Math.abs(angleDiff(r, correctRadial)) <= 5;
+
+      document.querySelectorAll('.answer-btn').forEach(b => {
+        if (Math.abs(angleDiff(parseInt(b.dataset.value), correctRadial)) <= 5) b.classList.add('correct');
+        b.disabled = true;
+      });
+      if (!isCorrect) btn.classList.add('incorrect');
+
+      handleExamAnswer(isCorrect);
+    });
+    actionsDiv.appendChild(btn);
+  });
+}
+
+function generateExamOBSQ() {
+  const precision = APP.difficulty === 'easy' ? 30 : APP.difficulty === 'medium' ? 10 : 5;
+  const targetRadial = (Math.floor(Math.random() * (360 / precision)) * precision) || 360;
+  const inbound = Math.random() > 0.5;
+  const expectedOBS = inbound ? normAngle(targetRadial + 180) || 360 : targetRadial;
+
+  // Place aircraft on a different radial for context
+  const offsetAngle = normAngle(targetRadial + 40 + Math.random() * 100);
+  const dist = 0.2 + Math.random() * 0.15;
+  const rad = offsetAngle * Math.PI / 180;
+  APP.aircraft.x = APP.vor1.x + dist * Math.sin(rad);
+  APP.aircraft.y = APP.vor1.y - dist * Math.cos(rad);
+  APP.aircraft.x = Math.max(0.05, Math.min(0.95, APP.aircraft.x));
+  APP.aircraft.y = Math.max(0.05, Math.min(0.95, APP.aircraft.y));
+
+  APP.interceptTarget = targetRadial;
+  APP.exercise = { type: 'obs', targetRadial, inbound, expectedOBS, answered: false, startTime: Date.now() };
+
+  const direction = inbound ? 'INBOUND (hacia la estaci\u00f3n)' : 'OUTBOUND (desde la estaci\u00f3n)';
+  document.getElementById('promptTitle').textContent = 'EXAMEN \u2014 OBS';
+  document.getElementById('promptText').textContent = `Ajusta el OBS para navegar ${direction} por el radial ${targetRadial.toString().padStart(3,'0')}. Luego presiona "Verificar".`;
+
+  const actionsDiv = document.getElementById('promptActions');
+  actionsDiv.innerHTML = '';
+  const checkBtn = document.createElement('button');
+  checkBtn.className = 'submit-btn';
+  checkBtn.textContent = 'VERIFICAR';
+  checkBtn.addEventListener('click', () => {
+    if (APP.exercise.answered) return;
+    APP.exercise.answered = true;
+
+    const tolerance = APP.difficulty === 'easy' ? 5 : APP.difficulty === 'medium' ? 3 : 1;
+    const diff = Math.abs(angleDiff(APP.obs, expectedOBS));
+    const isCorrect = diff <= tolerance;
+
+    // Show the correct answer inline
+    const explDiv = document.createElement('div');
+    explDiv.className = 'inline-explanation ' + (isCorrect ? 'success' : 'error');
+    explDiv.textContent = isCorrect ?
+      `\u2713 Correcto! OBS en ${APP.obs}\u00b0.` :
+      `\u2717 Incorrecto. El OBS correcto era ${expectedOBS}\u00b0.`;
+    actionsDiv.appendChild(explDiv);
+    checkBtn.disabled = true;
+
+    handleExamAnswer(isCorrect);
+  });
+  actionsDiv.appendChild(checkBtn);
+}
+
+function generateExamInterceptQ() {
+  const precision = APP.difficulty === 'easy' ? 30 : APP.difficulty === 'medium' ? 10 : 5;
+  const targetRadial = (Math.floor(Math.random() * (360 / precision)) * precision) || 360;
+  const inbound = Math.random() > 0.5;
+  const expectedOBS = inbound ? normAngle(targetRadial + 180) || 360 : targetRadial;
+
+  // Generate 4 OBS choices: correct + 3 wrong
+  const choices = [expectedOBS];
+  const wrongOffsets = [180, 90, -90];
+  wrongOffsets.forEach(o => {
+    let r = normAngle(expectedOBS + o);
+    if (r === 0) r = 360;
+    choices.push(r);
+  });
+  const shuffled = choices.sort(() => Math.random() - 0.5);
+
+  APP.interceptTarget = targetRadial;
+  APP.exercise = { type: 'intercept', targetRadial, inbound, expectedOBS, answered: false };
+
+  const direction = inbound ? 'inbound (TO)' : 'outbound (FROM)';
+  document.getElementById('promptTitle').textContent = 'EXAMEN \u2014 INTERCEPTAR';
+  document.getElementById('promptText').textContent = `Para interceptar el radial R-${targetRadial.toString().padStart(3,'0')} ${direction}, \u00bfqu\u00e9 valor de OBS seleccionar\u00edas?`;
+
+  const actionsDiv = document.getElementById('promptActions');
+  actionsDiv.innerHTML = '';
+  shuffled.forEach(r => {
+    const btn = document.createElement('button');
+    btn.className = 'answer-btn';
+    btn.textContent = `OBS ${r.toString().padStart(3, '0')}\u00b0`;
+    btn.dataset.value = r;
+    btn.addEventListener('click', () => {
+      if (APP.exercise.answered) return;
+      APP.exercise.answered = true;
+
+      const isCorrect = Math.abs(angleDiff(r, expectedOBS)) <= 5;
+
+      document.querySelectorAll('.answer-btn').forEach(b => {
+        if (Math.abs(angleDiff(parseInt(b.dataset.value), expectedOBS)) <= 5) b.classList.add('correct');
+        b.disabled = true;
+      });
+      if (!isCorrect) btn.classList.add('incorrect');
+
+      handleExamAnswer(isCorrect);
+    });
+    actionsDiv.appendChild(btn);
+  });
+}
+
+function handleExamAnswer(isCorrect) {
+  // Stop timer
+  if (APP.exam.timer) {
+    clearInterval(APP.exam.timer);
+    APP.exam.timer = null;
+  }
+
+  const timeTaken = (Date.now() - APP.exam.questionStartTime) / 1000;
+  const type = APP.exam.questions[APP.exam.currentIndex];
+
+  APP.exam.answers.push({
+    correct: isCorrect,
+    timeTaken: timeTaken,
+    type: type,
+    timeout: false
+  });
+
+  // Play sound
+  if (isCorrect) playSuccess(); else playError();
+
+  // Show brief feedback flash
+  showExamFeedback(isCorrect ? 'correct' : 'incorrect', isCorrect ? '\u2713 CORRECTO' : '\u2717 INCORRECTO');
+
+  // Auto-advance after 1.5s
+  setTimeout(() => advanceExamQuestion(), 1500);
+}
+
+function showExamFeedback(type, text) {
+  // Remove existing flash if any
+  const existing = document.querySelector('.exam-feedback-flash');
+  if (existing) existing.remove();
+
+  const flash = document.createElement('div');
+  flash.className = `exam-feedback-flash ${type}`;
+  flash.textContent = text;
+  document.body.appendChild(flash);
+
+  // Auto-remove after animation
+  setTimeout(() => { if (flash.parentNode) flash.remove(); }, 1600);
+}
+
+function advanceExamQuestion() {
+  APP.exam.currentIndex++;
+
+  // Remove progress bar
+  const bar = document.getElementById('examProgressBar');
+  if (bar) bar.remove();
+
+  if (APP.exam.currentIndex >= APP.exam.questions.length) {
+    showExamResults();
+  } else {
+    loadExamQuestion();
+  }
+}
+
+function showExamResults() {
+  // Stop timer if running
+  if (APP.exam.timer) {
+    clearInterval(APP.exam.timer);
+    APP.exam.timer = null;
+  }
+
+  const totalTime = (Date.now() - APP.exam.startTime) / 1000;
+  const totalCorrect = APP.exam.answers.filter(a => a.correct).length;
+  const total = APP.exam.answers.length;
+  const pct = Math.round((totalCorrect / total) * 100);
+
+  // Determine grade
+  let gradeText, gradeSubtitle, gradeClass;
+  if (pct >= 90) {
+    gradeText = 'EXCELENTE';
+    gradeSubtitle = 'Navegante Experto';
+    gradeClass = 'gold';
+  } else if (pct >= 75) {
+    gradeText = 'MUY BIEN';
+    gradeSubtitle = 'Navegante Competente';
+    gradeClass = 'green';
+  } else if (pct >= 60) {
+    gradeText = 'APROBADO';
+    gradeSubtitle = 'Navegante en Progreso';
+    gradeClass = 'cyan';
+  } else {
+    gradeText = 'NECESITA PR\u00c1CTICA';
+    gradeSubtitle = 'Sigue practicando los ejercicios';
+    gradeClass = 'red';
+  }
+
+  // Breakdown by type
+  const typeNames = {
+    position: 'Identificar Posici\u00f3n',
+    locate: 'Localizar Avi\u00f3n',
+    radial: 'Identificar Radial',
+    obs: 'Ajustar OBS',
+    intercept: 'Interceptar Radial'
+  };
+
+  const breakdown = {};
+  APP.exam.answers.forEach(a => {
+    if (!breakdown[a.type]) breakdown[a.type] = { correct: 0, total: 0 };
+    breakdown[a.type].total++;
+    if (a.correct) breakdown[a.type].correct++;
+  });
+
+  let breakdownHTML = '';
+  for (const [type, data] of Object.entries(breakdown)) {
+    const ratio = data.correct / data.total;
+    const cls = ratio >= 1 ? 'perfect' : ratio >= 0.5 ? 'partial' : 'failed';
+    breakdownHTML += `<tr><td>${typeNames[type] || type}</td><td class="${cls}">${data.correct} / ${data.total}</td></tr>`;
+  }
+
+  // Format total time
+  const mins = Math.floor(totalTime / 60);
+  const secs = Math.floor(totalTime % 60);
+
+  // Clear the instrument panel content temporarily
+  const promptTitle = document.getElementById('promptTitle');
+  const promptText = document.getElementById('promptText');
+  const actionsDiv = document.getElementById('promptActions');
+
+  // Remove progress bar
+  const bar = document.getElementById('examProgressBar');
+  if (bar) bar.remove();
+
+  // Unhide map
+  document.querySelector('.map-container').classList.remove('map-hidden');
+
+  promptTitle.textContent = 'RESULTADO DEL EXAMEN';
+  promptText.innerHTML = '';
+
+  actionsDiv.innerHTML = `
+    <div class="exam-results">
+      <div class="exam-results-score">${totalCorrect}/${total}</div>
+      <div class="exam-results-percent">${pct}%</div>
+      <div class="exam-grade ${gradeClass}">${gradeText}</div>
+      <div class="exam-grade-subtitle">${gradeSubtitle}</div>
+      <table class="exam-breakdown">
+        <thead><tr><th>Tipo de Ejercicio</th><th>Resultado</th></tr></thead>
+        <tbody>${breakdownHTML}</tbody>
+      </table>
+      <div class="exam-total-time">Tiempo total: <span>${mins}m ${secs.toString().padStart(2, '0')}s</span></div>
+      <div class="exam-actions">
+        ${pct >= 60 ? '<button class="cert-btn" id="certBtn">DESCARGAR CERTIFICADO</button>' : ''}
+        <button class="exam-retry-btn" id="examRetryBtn">REINTENTAR EXAMEN</button>
+        <button class="exam-back-btn" id="examBackBtn">VOLVER A PR\u00c1CTICA</button>
+      </div>
+    </div>
+  `;
+
+  // Event listeners
+  if (pct >= 60) {
+    document.getElementById('certBtn').addEventListener('click', () => generateCertificate(totalCorrect, total, pct, gradeText, gradeSubtitle, totalTime));
+  }
+  document.getElementById('examRetryBtn').addEventListener('click', () => {
+    endExam();
+    showExamPrescreen();
+  });
+  document.getElementById('examBackBtn').addEventListener('click', () => {
+    endExam();
+    setMode('free');
+  });
+
+  setFeedback(`Examen completado: ${totalCorrect}/${total} (${pct}%) \u2014 ${gradeText}`, pct >= 60 ? 'success' : 'error');
+}
+
+function generateCertificate(correct, total, pct, gradeText, gradeSubtitle, totalTimeSeconds) {
+  const canvas = document.createElement('canvas');
+  canvas.width = 800;
+  canvas.height = 600;
+  const c = canvas.getContext('2d');
+
+  // Background
+  const bgGrad = c.createLinearGradient(0, 0, 0, 600);
+  bgGrad.addColorStop(0, '#0e1018');
+  bgGrad.addColorStop(0.5, '#0a0c10');
+  bgGrad.addColorStop(1, '#0e1018');
+  c.fillStyle = bgGrad;
+  c.fillRect(0, 0, 800, 600);
+
+  // Border
+  c.strokeStyle = '#ffb020';
+  c.lineWidth = 3;
+  c.strokeRect(20, 20, 760, 560);
+
+  // Inner border
+  c.strokeStyle = 'rgba(255, 176, 32, 0.3)';
+  c.lineWidth = 1;
+  c.strokeRect(30, 30, 740, 540);
+
+  // Corner accents
+  const cornerSize = 30;
+  c.strokeStyle = '#00d4ff';
+  c.lineWidth = 2;
+  [[30, 30, 1, 1], [740, 30, -1, 1], [30, 540, 1, -1], [740, 540, -1, -1]].forEach(([x, y, dx, dy]) => {
+    c.beginPath();
+    c.moveTo(x, y + cornerSize * dy);
+    c.lineTo(x, y);
+    c.lineTo(x + cornerSize * dx, y);
+    c.stroke();
+  });
+
+  // Title
+  c.font = '700 28px "Orbitron", sans-serif';
+  c.fillStyle = '#ffb020';
+  c.textAlign = 'center';
+  c.fillText('CERTIFICADO DE NAVEGACI\u00d3N VOR', 400, 90);
+
+  // Subtitle
+  c.font = '400 14px "Exo 2", sans-serif';
+  c.fillStyle = '#6a7080';
+  c.fillText('VOR Navigator \u2014 Simulador de Navegaci\u00f3n A\u00e9rea', 400, 120);
+
+  // Decorative line
+  c.strokeStyle = 'rgba(0, 212, 255, 0.3)';
+  c.lineWidth = 1;
+  c.beginPath();
+  c.moveTo(200, 140);
+  c.lineTo(600, 140);
+  c.stroke();
+
+  // "Certifica que" text
+  c.font = '400 16px "Exo 2", sans-serif';
+  c.fillStyle = '#c8ccd4';
+  c.fillText('Se certifica que el participante ha completado', 400, 190);
+  c.fillText('satisfactoriamente la evaluaci\u00f3n de navegaci\u00f3n VOR', 400, 215);
+
+  // Score
+  c.font = '900 64px "Orbitron", sans-serif';
+  c.fillStyle = '#f0f2f5';
+  c.fillText(`${correct}/${total}`, 400, 300);
+
+  c.font = '600 24px "Orbitron", sans-serif';
+  c.fillStyle = '#00d4ff';
+  c.fillText(`${pct}%`, 400, 340);
+
+  // Grade
+  let gradeColor = pct >= 90 ? '#ffd700' : pct >= 75 ? '#00e676' : '#00d4ff';
+  c.font = '700 22px "Orbitron", sans-serif';
+  c.fillStyle = gradeColor;
+  c.fillText(gradeText, 400, 390);
+
+  c.font = '400 16px "Exo 2", sans-serif';
+  c.fillStyle = '#a0a8b8';
+  c.fillText(gradeSubtitle, 400, 420);
+
+  // Decorative line
+  c.strokeStyle = 'rgba(255, 176, 32, 0.3)';
+  c.beginPath();
+  c.moveTo(250, 450);
+  c.lineTo(550, 450);
+  c.stroke();
+
+  // Date
+  const now = new Date();
+  const dateStr = now.toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric' });
+  c.font = '400 14px "Exo 2", sans-serif';
+  c.fillStyle = '#6a7080';
+  c.fillText(`Fecha: ${dateStr}`, 400, 480);
+
+  // Time taken
+  const mins = Math.floor(totalTimeSeconds / 60);
+  const secs = Math.floor(totalTimeSeconds % 60);
+  c.fillText(`Tiempo: ${mins}m ${secs.toString().padStart(2, '0')}s`, 400, 505);
+
+  // Footer
+  c.font = '400 12px "Exo 2", sans-serif';
+  c.fillStyle = '#505668';
+  c.fillText('Generado por VOR Navigator \u2014 vor-simulator.vercel.app', 400, 560);
+
+  // Download
+  const link = document.createElement('a');
+  link.download = `certificado-vor-${pct}pct-${now.toISOString().slice(0,10)}.png`;
+  link.href = canvas.toDataURL('image/png');
+  link.click();
+}
+
+function endExam() {
+  // Stop timer
+  if (APP.exam.timer) {
+    clearInterval(APP.exam.timer);
+    APP.exam.timer = null;
+  }
+
+  // Reset exam state
+  APP.exam.active = false;
+  APP.exam.questions = [];
+  APP.exam.currentIndex = 0;
+  APP.exam.answers = [];
+  APP.exam.startTime = null;
+  APP.exam.questionStartTime = null;
+
+  // Unlock sidebar
+  document.querySelector('.sidebar').classList.remove('exam-locked');
+
+  // Remove progress bar if present
+  const bar = document.getElementById('examProgressBar');
+  if (bar) bar.remove();
+
+  // Unhide map
+  document.querySelector('.map-container').classList.remove('map-hidden');
+  APP.locateDragDisabled = false;
+
+  // Reset intercept target
+  APP.interceptTarget = null;
+
+  // Reset exercise
+  APP.exercise = null;
+}
+
+// Exam button event listener
+document.getElementById('examBtn').addEventListener('click', showExamPrescreen);
 
 init();
 </script>
