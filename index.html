@@ -678,6 +678,75 @@ body {
 /* ═══════════ HIDDEN WHEN NOT ACTIVE ═══════════ */
 .hidden { display: none !important; }
 
+/* ═══════════ HAMBURGER & MOBILE SIDEBAR ═══════════ */
+.hamburger-btn {
+  display: none; /* hidden on desktop */
+  width: 44px;
+  height: 44px;
+  border: 1px solid var(--panel-border);
+  border-radius: 8px;
+  background: rgba(255,255,255,0.03);
+  color: var(--text-primary);
+  font-size: 24px;
+  cursor: pointer;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: all 0.2s;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.hamburger-btn:hover {
+  border-color: var(--accent-cyan);
+  background: rgba(0, 212, 255, 0.08);
+  color: var(--accent-cyan);
+}
+
+.sidebar-close-btn {
+  display: none; /* hidden on desktop */
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 1px solid var(--panel-border);
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--text-dim);
+  font-size: 22px;
+  cursor: pointer;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+  transition: all 0.2s;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.sidebar-close-btn:hover {
+  border-color: var(--error);
+  color: var(--error);
+  background: rgba(255, 68, 68, 0.1);
+}
+
+.sidebar-overlay {
+  display: none; /* hidden on desktop */
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.6);
+  z-index: 200;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+
+.sidebar-overlay.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
 /* ═══════════ RESPONSIVE ═══════════ */
 @media (max-width: 1100px) {
   .main-container {
@@ -685,22 +754,300 @@ body {
   }
 }
 
-@media (max-width: 900px) {
+/* ═══════════ TABLET (768px) ═══════════ */
+@media (max-width: 768px) {
   .main-container {
-    grid-template-columns: 1fr;
-    grid-template-rows: auto 300px auto;
+    grid-template-columns: 240px 1fr;
+    grid-template-rows: 1fr auto;
+    height: calc(100vh - 60px);
   }
+
+  /* Sidebar spans full height */
   .sidebar {
+    grid-row: 1 / -1;
+  }
+
+  /* Map in top-right */
+  .map-container {
     border-right: none;
     border-bottom: 1px solid var(--panel-border);
-    max-height: 200px;
+    min-height: 250px;
   }
+
+  /* Instrument panel below map in same column */
+  .instrument-panel {
+    grid-column: 2;
+    overflow-y: auto;
+  }
+
   .instrument-wrapper {
-    width: 280px;
-    height: 280px;
+    width: 320px;
+    height: 320px;
   }
-  .exercise-prompt { max-width: 300px; }
-  .obs-controls { max-width: 280px; }
+
+  .instrument-pair .instrument-wrapper {
+    width: 200px;
+    height: 200px;
+  }
+
+  .obs-controls { max-width: 320px; }
+  .exercise-prompt { max-width: 340px; }
+
+  .header-stats { gap: 16px; }
+  .stat-value { font-size: 16px; }
+}
+
+/* ═══════════ MOBILE (600px) ═══════════ */
+@media (max-width: 600px) {
+  /* Show hamburger button */
+  .hamburger-btn {
+    display: flex;
+  }
+
+  /* Show sidebar close button */
+  .sidebar-close-btn {
+    display: flex;
+  }
+
+  /* Show sidebar overlay */
+  .sidebar-overlay {
+    display: block;
+  }
+
+  /* Header adjustments */
+  .app-header {
+    padding: 8px 12px;
+    gap: 8px;
+  }
+
+  .app-logo h1 { font-size: 14px; letter-spacing: 1px; }
+  .app-logo .subtitle { font-size: 10px; letter-spacing: 1px; }
+  .app-logo svg { width: 28px; height: 28px; }
+
+  .header-stats { gap: 12px; }
+  .stat-value { font-size: 14px; }
+  .stat-label { font-size: 9px; letter-spacing: 1px; }
+
+  /* Single column layout — use flex instead of grid so fixed sidebar doesn't create a ghost column */
+  .main-container {
+    display: flex;
+    flex-direction: column;
+    height: auto;
+    min-height: calc(100vh - 56px);
+  }
+
+  /* Sidebar becomes slide-in overlay */
+  .sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 280px;
+    height: 100%;
+    z-index: 210;
+    border-right: 1px solid var(--panel-border);
+    transform: translateX(-100%);
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    overflow-y: auto;
+    padding-top: 48px; /* space for close button */
+    grid-row: auto; /* reset tablet grid-row */
+  }
+
+  .sidebar.open {
+    transform: translateX(0);
+  }
+
+  /* Map area */
+  .map-container {
+    height: 40vh;
+    min-height: 220px;
+    border-right: none;
+    border-bottom: 1px solid var(--panel-border);
+  }
+
+  /* Instrument panel */
+  .instrument-panel {
+    padding: 16px 12px;
+    overflow-y: visible;
+    align-items: center;
+  }
+
+  .instrument-wrapper {
+    width: 300px;
+    height: 300px;
+    margin-bottom: 12px;
+  }
+
+  .instrument-pair .instrument-wrapper {
+    width: 145px;
+    height: 145px;
+  }
+
+  .instrument-pair {
+    gap: 10px;
+  }
+
+  .instrument-pair .obs-controls {
+    max-width: 145px;
+  }
+
+  .instrument-pair .obs-display .obs-value {
+    font-size: 16px;
+  }
+
+  /* OBS controls: touch-friendly */
+  .obs-controls {
+    max-width: 300px;
+    gap: 10px;
+  }
+
+  .obs-btn {
+    width: 48px;
+    height: 48px;
+    font-size: 18px;
+  }
+
+  .obs-btn.fast {
+    width: 44px;
+    height: 44px;
+    font-size: 14px;
+  }
+
+  /* Exercise prompt: full width, no scroll */
+  .exercise-prompt {
+    max-width: 100%;
+    width: 100%;
+    margin-bottom: 12px;
+    border-radius: 8px;
+  }
+
+  .prompt-text {
+    font-size: 14px;
+    line-height: 1.5;
+  }
+
+  /* Answer buttons: full width, touch-friendly */
+  .prompt-actions {
+    flex-direction: column;
+  }
+
+  .answer-btn {
+    width: 100%;
+    padding: 14px 18px;
+    font-size: 15px;
+    min-height: 48px;
+    text-align: center;
+  }
+
+  .submit-btn {
+    width: 100%;
+    padding: 14px 28px;
+    font-size: 14px;
+    min-height: 48px;
+  }
+
+  .next-btn {
+    width: 100%;
+    padding: 14px 28px;
+    font-size: 14px;
+    min-height: 48px;
+  }
+
+  .reload-btn {
+    width: 40px;
+    height: 40px;
+    font-size: 20px;
+  }
+
+  /* OBS input touch-friendly */
+  .obs-input {
+    width: 90px;
+    padding: 12px;
+    font-size: 20px;
+    min-height: 48px;
+  }
+
+  .obs-input-group {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  /* Passage controls */
+  .play-btn {
+    padding: 12px 24px;
+    min-height: 48px;
+  }
+
+  .speed-select {
+    padding: 12px;
+    min-height: 48px;
+  }
+
+  .passage-controls {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  /* Exam specific */
+  .exam-btn {
+    padding: 14px;
+    min-height: 48px;
+  }
+
+  .exam-progress-bar {
+    max-width: 100%;
+  }
+
+  .exam-results {
+    max-width: 100%;
+    padding: 0 8px;
+  }
+
+  .exam-actions {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .exam-actions button {
+    width: 100%;
+    min-height: 48px;
+  }
+
+  .exam-start-btn {
+    width: 100%;
+    min-height: 48px;
+  }
+
+  /* Help button positioning on mobile */
+  .help-btn {
+    bottom: 12px;
+    right: 12px;
+    width: 48px;
+    height: 48px;
+    font-size: 20px;
+  }
+
+  .help-panel {
+    width: 100%;
+  }
+
+  /* Map overlay info */
+  .map-overlay-info {
+    font-size: 11px;
+    padding: 6px 10px;
+  }
+
+  /* Difficulty buttons touch-friendly */
+  .diff-btn {
+    padding: 12px 8px;
+    min-height: 44px;
+    font-size: 14px;
+  }
+
+  /* Exercise buttons touch-friendly */
+  .exercise-btn {
+    padding: 12px;
+    min-height: 48px;
+  }
 }
 
 /* ═══════════ ANIMATIONS ═══════════ */
@@ -1519,6 +1866,7 @@ body {
 
 <!-- ═══════════ HEADER ═══════════ -->
 <header class="app-header">
+  <button class="hamburger-btn" id="hamburgerBtn">&#9776;</button>
   <div class="app-logo">
     <svg viewBox="0 0 32 32" fill="none">
       <circle cx="16" cy="16" r="14" stroke="url(#logoGrad)" stroke-width="2"/>
@@ -1545,11 +1893,15 @@ body {
   </div>
 </header>
 
+<!-- Sidebar overlay for mobile -->
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+
 <!-- ═══════════ MAIN ═══════════ -->
 <div class="main-container">
 
   <!-- SIDEBAR -->
-  <aside class="sidebar">
+  <aside class="sidebar" id="sidebar">
+    <button class="sidebar-close-btn" id="sidebarCloseBtn">&times;</button>
     <div class="section-title">Ejercicios</div>
     <button class="exam-btn" id="examBtn">
       <div class="ex-icon">&#128203;</div>
@@ -2664,6 +3016,11 @@ function setMode(mode) {
   document.querySelectorAll('.exercise-btn').forEach(b => {
     b.classList.toggle('active', b.dataset.mode === mode);
   });
+
+  // Auto-close sidebar on mobile when exercise is selected
+  if (window.innerWidth <= 600) {
+    closeSidebar();
+  }
 
   // Help system: show/hide help button (not in free mode)
   const helpBtn = document.getElementById('helpBtn');
@@ -3848,6 +4205,11 @@ function showExamPrescreen() {
   // Prevent starting if already in exam
   if (APP.exam.active) return;
 
+  // Auto-close sidebar on mobile
+  if (window.innerWidth <= 600) {
+    closeSidebar();
+  }
+
   // Switch to a neutral mode visually
   APP.mode = 'free';
   document.querySelectorAll('.exercise-btn').forEach(b => b.classList.remove('active'));
@@ -4638,6 +5000,47 @@ function endExam() {
 
 // Exam button event listener
 document.getElementById('examBtn').addEventListener('click', showExamPrescreen);
+
+// ═══════════ MOBILE SIDEBAR TOGGLE ═══════════
+
+const hamburgerBtn = document.getElementById('hamburgerBtn');
+const sidebarEl = document.getElementById('sidebar');
+const sidebarOverlay = document.getElementById('sidebarOverlay');
+const sidebarCloseBtn = document.getElementById('sidebarCloseBtn');
+
+function openSidebar() {
+  sidebarEl.classList.add('open');
+  sidebarOverlay.classList.add('active');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeSidebar() {
+  sidebarEl.classList.remove('open');
+  sidebarOverlay.classList.remove('active');
+  document.body.style.overflow = '';
+}
+
+function isMobileView() {
+  return window.innerWidth <= 600;
+}
+
+hamburgerBtn.addEventListener('click', () => {
+  if (sidebarEl.classList.contains('open')) {
+    closeSidebar();
+  } else {
+    openSidebar();
+  }
+});
+
+sidebarOverlay.addEventListener('click', closeSidebar);
+sidebarCloseBtn.addEventListener('click', closeSidebar);
+
+// Close sidebar on window resize to desktop
+window.addEventListener('resize', () => {
+  if (!isMobileView() && sidebarEl.classList.contains('open')) {
+    closeSidebar();
+  }
+});
 
 init();
 </script>
