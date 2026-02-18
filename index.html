@@ -2295,10 +2295,12 @@ function computeVOR(aircraftX, aircraftY, vorX, vorY, obs) {
   const flag = diffToStation <= 90 ? 'TO' : 'FROM';
 
   // CDI: angular difference between selected course and actual radial
-  // Positive = needle deflects right, negative = needle deflects left
-  let cdiAngle = angleDiff(radial, obsNorm);
+  // Positive = needle deflects right (course is to your right)
+  // Negative = needle deflects left (course is to your left)
+  // Convention: "fly toward the needle" to intercept the course
+  let cdiAngle;
   if (flag === 'TO') {
-    cdiAngle = angleDiff(normAngle(obsNorm + 180), radial);
+    cdiAngle = angleDiff(radial, normAngle(obsNorm + 180));
   } else {
     cdiAngle = angleDiff(obsNorm, radial);
   }
