@@ -312,6 +312,13 @@ body {
   padding: 16px;
   margin-bottom: 16px;
 }
+.score-panel.compact-score {
+  padding: 10px 14px;
+  margin-bottom: 10px;
+}
+.compact-score .score-display {
+  margin-bottom: 0;
+}
 
 .score-display {
   display: flex;
@@ -423,16 +430,16 @@ body {
   flex-direction: column;
   align-items: center;
   justify-content: flex-start;
-  padding: 20px;
+  padding: 12px 20px;
   overflow-y: auto;
   position: relative;
 }
 
 .instrument-wrapper {
   position: relative;
-  width: 340px;
-  height: 340px;
-  margin-bottom: 16px;
+  width: 280px;
+  height: 280px;
+  margin-bottom: 10px;
   flex-shrink: 0;
 }
 
@@ -448,8 +455,8 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 16px;
-  margin-bottom: 20px;
+  gap: 12px;
+  margin-bottom: 10px;
   width: 100%;
   max-width: 340px;
 }
@@ -490,14 +497,14 @@ body {
   background: #050608;
   border: 2px solid var(--bezel-outer);
   border-radius: 8px;
-  padding: 8px 16px;
+  padding: 6px 14px;
   text-align: center;
-  min-width: 90px;
+  min-width: 80px;
 }
 
 .obs-display .obs-value {
   font-family: 'Orbitron', sans-serif;
-  font-size: 28px;
+  font-size: 24px;
   font-weight: 700;
   color: var(--accent-green);
   text-shadow: 0 0 10px rgba(0, 230, 118, 0.3);
@@ -516,20 +523,20 @@ body {
   background: rgba(0,0,0,0.3);
   border: 1px solid var(--panel-border);
   border-radius: 10px;
-  padding: 16px;
-  margin-bottom: 16px;
+  padding: 12px 14px;
+  margin-bottom: 8px;
 }
 
 .prompt-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 10px;
+  margin-bottom: 6px;
 }
 
 .prompt-title {
   font-family: 'Orbitron', sans-serif;
-  font-size: 13px;
+  font-size: 12px;
   letter-spacing: 2px;
   color: var(--accent-amber);
 }
@@ -557,26 +564,26 @@ body {
 .reload-btn.hidden { display: none; }
 
 .prompt-text {
-  font-size: 15px;
-  line-height: 1.6;
+  font-size: 13px;
+  line-height: 1.5;
   color: var(--text-bright);
-  margin-bottom: 12px;
+  margin-bottom: 8px;
 }
 
 .prompt-actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
 }
 
 .answer-btn {
-  padding: 9px 18px;
+  padding: 8px 12px;
   border: 1px solid var(--panel-border);
   border-radius: 6px;
   background: rgba(255,255,255,0.03);
   color: var(--text-primary);
   font-family: 'Exo 2', sans-serif;
-  font-size: 14px;
+  font-size: 13px;
   cursor: pointer;
   transition: all 0.2s;
 }
@@ -605,6 +612,7 @@ body {
 }
 
 .submit-btn {
+  grid-column: 1 / -1;
   padding: 10px 28px;
   border: none;
   border-radius: 6px;
@@ -621,6 +629,7 @@ body {
 .submit-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; box-shadow: none; }
 
 .next-btn {
+  grid-column: 1 / -1;
   padding: 10px 28px;
   border: 1px solid var(--accent-amber);
   border-radius: 6px;
@@ -636,11 +645,11 @@ body {
 .next-btn:hover { background: rgba(255, 176, 32, 0.2); }
 
 .inline-explanation {
-  margin-top: 12px;
-  padding: 10px 14px;
+  margin-top: 8px;
+  padding: 8px 12px;
   border-radius: 6px;
-  font-size: 13px;
-  line-height: 1.5;
+  font-size: 12px;
+  line-height: 1.4;
   animation: slide-up 0.3s ease;
 }
 .inline-explanation.success {
@@ -1991,8 +2000,7 @@ body {
       <button class="diff-btn" data-diff="hard">Difícil</button>
     </div>
 
-    <div class="section-title">Rendimiento</div>
-    <div class="score-panel">
+    <div class="score-panel compact-score">
       <div class="score-display">
         <div class="score-item">
           <div class="score-number correct" id="correctCount">0</div>
@@ -2007,17 +2015,10 @@ body {
           <div class="score-sublabel">Racha</div>
         </div>
       </div>
-      <div class="accuracy-bar">
-        <div class="accuracy-fill" id="accuracyBar" style="width: 0%"></div>
-      </div>
     </div>
-
-    <div class="section-title">Retroalimentación</div>
-    <div class="feedback-area">
-      <h4>Estado</h4>
-      <div class="feedback-text info" id="feedbackText">
-        Selecciona un ejercicio o arrastra el avión en el mapa para comenzar.
-      </div>
+    <!-- Feedback area hidden: inline explanations used instead -->
+    <div class="feedback-area" style="display:none">
+      <div class="feedback-text info" id="feedbackText"></div>
     </div>
   </aside>
 
@@ -3167,18 +3168,23 @@ function generatePositionExercise() {
   });
 }
 
+function getCardinal(r) {
+  r = ((r % 360) + 360) % 360;
+  if (r >= 316 || r < 46) return 'N';
+  if (r >= 46 && r < 136) return 'E';
+  if (r >= 136 && r < 226) return 'S';
+  return 'O';
+}
+const cardinalLabels = { 'N': 'Norte (316-045)', 'E': 'Este (046-135)', 'S': 'Sur (136-225)', 'O': 'Oeste (226-315)' };
+
 function generatePositionChoices(correctRadial) {
-  const quadrants = [
-    { label: 'NE (001-090)', min: 1, max: 90 },
-    { label: 'SE (091-180)', min: 91, max: 180 },
-    { label: 'SO (181-270)', min: 181, max: 270 },
-    { label: 'NO (271-360)', min: 271, max: 360 }
-  ];
+  const keys = ['N', 'E', 'S', 'O'];
+  const correctKey = getCardinal(correctRadial);
 
   if (APP.difficulty === 'easy') {
-    return quadrants.map(q => ({
-      label: q.label,
-      value: q.min <= correctRadial && correctRadial <= q.max ? correctRadial : q.min
+    return keys.map(k => ({
+      label: cardinalLabels[k],
+      value: k === correctKey ? correctRadial : ({'N':360,'E':90,'S':180,'O':270})[k]
     }));
   }
 
@@ -3201,8 +3207,7 @@ function handlePositionAnswer(selected, correct, btnEl) {
   let isCorrect;
 
   if (isCorrectQuadrant) {
-    const getQuad = r => r <= 90 ? 'NE' : r <= 180 ? 'SE' : r <= 270 ? 'SO' : 'NO';
-    isCorrect = getQuad(selected) === getQuad(correct) || selected === correct;
+    isCorrect = getCardinal(selected) === getCardinal(correct) || selected === correct;
   } else {
     isCorrect = Math.abs(angleDiff(selected, correct)) <= 5;
   }
@@ -3210,8 +3215,7 @@ function handlePositionAnswer(selected, correct, btnEl) {
   document.querySelectorAll('.answer-btn').forEach(b => {
     const val = parseInt(b.dataset.value);
     if (isCorrectQuadrant) {
-      const getQuad = r => r <= 90 ? 'NE' : r <= 180 ? 'SE' : r <= 270 ? 'SO' : 'NO';
-      if (getQuad(val) === getQuad(correct) || val === correct) b.classList.add('correct');
+      if (getCardinal(val) === getCardinal(correct) || val === correct) b.classList.add('correct');
     } else {
       if (Math.abs(angleDiff(val, correct)) <= 5) b.classList.add('correct');
     }
@@ -3284,10 +3288,7 @@ function generateLocateExercise() {
 
   if (APP.difficulty === 'easy') {
     const quadrants = ['N', 'E', 'S', 'O'];
-    const quadrantMap = { 'N': 'N', 'NE': 'NE→E', 'E': 'E', 'SE': 'SE→S', 'S': 'S', 'SO': 'SO→O', 'O': 'O', 'NO': 'NO→N' };
-    const correctQuadrant = ['N', 'NE'].includes(correctOctant) ? 'N' :
-                            ['E', 'SE'].includes(correctOctant) ? 'E' :
-                            ['S', 'SO'].includes(correctOctant) ? 'S' : 'O';
+    const correctQuadrant = getCardinal(actualRadial);
     correctLabel = octantNames[correctQuadrant] || correctQuadrant;
     allOptions = quadrants.map(q => ({
       text: `${octantNames[q]} del VOR`,
@@ -4500,8 +4501,7 @@ function generateExamPositionQ() {
       const isCorrectQuadrant = APP.difficulty === 'easy';
       let isCorrect;
       if (isCorrectQuadrant) {
-        const getQuad = r => r <= 90 ? 'NE' : r <= 180 ? 'SE' : r <= 270 ? 'SO' : 'NO';
-        isCorrect = getQuad(pos.value) === getQuad(correctRadial) || pos.value === correctRadial;
+        isCorrect = getCardinal(pos.value) === getCardinal(correctRadial) || pos.value === correctRadial;
       } else {
         isCorrect = Math.abs(angleDiff(pos.value, correctRadial)) <= 5;
       }
@@ -4510,8 +4510,7 @@ function generateExamPositionQ() {
       document.querySelectorAll('.answer-btn').forEach(b => {
         const val = parseInt(b.dataset.value);
         if (isCorrectQuadrant) {
-          const getQuad = r => r <= 90 ? 'NE' : r <= 180 ? 'SE' : r <= 270 ? 'SO' : 'NO';
-          if (getQuad(val) === getQuad(correctRadial) || val === correctRadial) b.classList.add('correct');
+          if (getCardinal(val) === getCardinal(correctRadial) || val === correctRadial) b.classList.add('correct');
         } else {
           if (Math.abs(angleDiff(val, correctRadial)) <= 5) b.classList.add('correct');
         }
