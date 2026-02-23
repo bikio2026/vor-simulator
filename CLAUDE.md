@@ -8,7 +8,7 @@
 - Archivo unico: `index.html` (monolitico, ~5500 lineas)
 - Puerto dev: 3002 (`npx http-server -c-1 -p 3002`)
 
-## Estado actual: v1.5
+## Version actual: v1.5 (2026-02-17) + hotfixes
 - Fase 1 completa (5 pasos)
 - Ejercicios: Practica Libre, Identificar Posicion, Localizar Avion, Identificar Radial, Ajustar OBS, Paso por Estacion, Interceptar Radial, Triangulacion
 - Sistema de ayuda con 3 pistas progresivas (-20% penalidad cada una)
@@ -128,3 +128,54 @@ Convencion verificada contra referencia: "si el avion esta a la IZQUIERDA del cu
   - El archivo tiene ~5500 lineas, manejable pero en el limite
   - Beneficios: componentes, routing, SSR para SEO
   - Costo: reescritura significativa
+
+---
+
+## Changelog
+
+### v1.5 — SEO y metadatos (2026-02-17)
+- Meta tags mejorados: titulo con keywords, descripcion, Open Graph, Twitter Card
+- URL canonica y JSON-LD como EducationalApplication
+- Favicon SVG inline con tematica VOR
+- Meta theme-color
+
+**Post-v1.5 hotfixes (2026-02-18):**
+- Fix: UI compacta para caber en viewport, clasificacion de direcciones cardinales corregida
+- Fix: polaridad del CDI invertida en modo TO (bug critico en `computeVOR()`)
+- Docs: auditoria completa de fisica VOR con bateria de 16 tests y referencias
+
+### v1.4 — Layout responsive y mobile (2026-02-17)
+- Menu hamburguesa con sidebar deslizable en mobile (<=600px)
+- Backdrop oscuro y auto-cierre al seleccionar ejercicio
+- Layout vertical en mobile: mapa (40vh) → instrumento → prompt
+- Controles touch-friendly con tap targets de 48px minimo
+- Breakpoint tablet a 768px con layout de 2 columnas
+- Botones de respuesta a ancho completo en mobile
+
+### v1.3 — Modo examen (2026-02-17)
+- Modo examen con 15 preguntas mixtas y temporizadas (2 min c/u)
+- Pantalla pre-examen con reglas
+- Warning visual a los 30 segundos restantes
+- Sidebar bloqueado y pistas deshabilitadas durante examen
+- Pantalla de resultados con niveles (Excelente/Muy Bien/Aprobado/Necesita Practica)
+- Desglose por tipo de ejercicio
+- Certificado PNG descargable para puntajes >= 60%
+- Fix: overlay de mapa opaco, boton recargar, explicaciones inline
+- Fix: re-ocultar mapa al generar nuevo ejercicio de localizar
+
+### v1.2 — Sistema de ayuda y ejercicio Localizar (2026-02-16)
+- Sistema de ayuda contextual con 3 pistas progresivas (-20% penalidad c/u)
+- Panel de ayuda deslizable con explicacion, pistas y pregunta guia
+- Nudge por inactividad a los 30 segundos
+- Nuevo ejercicio "Localizar Avion": mapa oculto, deducir posicion desde el instrumento
+- Instrumento revertido a 340px (usuario prefirio tamano original)
+- Mas opciones de velocidad para paso por estacion (0.1x, 0.25x, 3x)
+- Mejora de visibilidad de estacion VOR y etiquetas de radiales
+
+### v1.1 — Mejoras visuales (2026-02-16)
+- Instrumento VOR agrandado de 340px a 400px con breakpoints responsivos
+- Fuentes mas grandes en rosa de los vientos y componentes del CDI
+- Avion simple reemplazado por silueta detallada de Cessna
+- Hexagono de estacion VOR agrandado con decoracion de anillo interior
+- Instrumento dual de triangulacion agrandado (240→280px)
+- Media queries responsivos para 1400px, 1100px, 900px
